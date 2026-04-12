@@ -182,9 +182,9 @@ background: #0F172A;
 border-bottom-color: var(–indigo-mid);
 }
 
-/* Font-size utility classes */
-body.fs-lg  { font-size: 18px; }
-body.fs-xl  { font-size: 20px; }
+/* Font-size utility classes (zwischen 16 px und 19 px) */
+body.fs-lg  { font-size: 17px; }  /* A+  */
+body.fs-xl  { font-size: 19px; }  /* A++ */
 body.line-height-lg * { line-height: 1.95 !important; }
 
 /* ── NAVIGATION ──────────────────────────────────────────── */
