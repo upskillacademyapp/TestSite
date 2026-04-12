@@ -140,74 +140,46 @@ border: 0;
 
 /* ── ACCESSIBILITY TOOLBAR ───────────────────────────────── */
 #a11y-bar {
-background: var(–indigo);
-color: #fff;
+background: #1E293B;          /* dunkel → starker Kontrast im Light-Modus */
+color: #F1F5F9;
 display: flex;
 align-items: center;
 gap: 0.375rem;
 flex-wrap: wrap;
 padding: 0.375rem 1rem;
 font-size: 0.8125rem;
+border-bottom: 2px solid var(–indigo);
 }
-
 #a11y-bar .a11y-label {
-opacity: .85;
+font-size: 1rem;
 margin-right: 0.25rem;
+opacity: 1;                   /* vorher .85 → jetzt voll sichtbar */
 }
-
-/* Light Mode */
 #a11y-bar button {
-background: #fff;
-border: 1px solid #E2E8F0;
-color: var(–indigo);
+background: #334155;          /* mittleres Grau – klar sichtbar auf dunkelm BG */
+border: 1.5px solid #64748B;
+color: #F1F5F9;               /* helles Weiß */
 border-radius: var(–r-sm);
-padding: 0.25rem 0.625rem;
+padding: 0.25rem 0.75rem;
 font-size: 0.75rem;
-font-weight: 600;
+font-weight: 700;
 cursor: pointer;
-transition: all .2s;
+transition: background .2s, border-color .2s;
+min-width: 2rem;
+text-align: center;
 }
-
 #a11y-bar button:hover {
-background: var(–indigo-pale);
-color: var(–indigo);
-}
-
-#a11y-bar button:focus-visible {
-outline: 2px solid var(–indigo);
-outline-offset: 2px;
-}
-
-/* Dark Mode */
-[data-theme=“dark”] #a11y-bar button {
-background: rgba(255,255,255,.18);
-border: 1px solid rgba(255,255,255,.38);
+background: var(–indigo);
+border-color: var(–indigo-light);
 color: #fff;
 }
-
-[data-theme=“dark”] #a11y-bar button:hover {
-background: rgba(255,255,255,.32);
-}
-
-[data-theme=“dark”] #a11y-bar button:focus-visible {
-outline: 2px solid #fff;
+#a11y-bar button:focus-visible {
+outline: 2px solid #A5B4FC;
 outline-offset: 2px;
 }
-
-/* Dark Mode */
-[data-theme="dark"] #a11y-bar button {
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.38);
-  color: #fff;
-}
-
-[data-theme="dark"] #a11y-bar button:hover {
-  background: rgba(255,255,255,.32);
-}
-
-[data-theme="dark"] #a11y-bar button:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+[data-theme=“dark”] #a11y-bar {
+background: #0F172A;
+border-bottom-color: var(–indigo-mid);
 }
 
 /* Font-size utility classes */
