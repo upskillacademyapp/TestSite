@@ -140,8 +140,8 @@ border: 0;
 
 /* ── ACCESSIBILITY TOOLBAR ───────────────────────────────── */
 #a11y-bar {
-background: #fff;
-color: var(–indigo);
+background: var(–indigo);
+color: #fff;
 display: flex;
 align-items: center;
 gap: 0.375rem;
