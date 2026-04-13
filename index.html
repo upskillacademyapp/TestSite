@@ -3,24 +3,981 @@
 <html lang="de" data-theme="light">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="description" content="Upskill Academy – Interaktive Lernplattform für HR, Gehaltsabrechnung und mehr."/>
 <title>Upskill Academy</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css"/>
 <style>
-/* ── Accessibility Bar ── */
-#a11y-bar{background:#1e293b;display:flex;align-items:center;gap:.375rem;flex-wrap:wrap;padding:.35rem 1rem;border-bottom:2px solid #4F46E5;}
-#a11y-bar button{background:#334155;border:1.5px solid #64748b;color:#f1f5f9;border-radius:7px;padding:.25rem .6rem;font-size:.8rem;font-weight:700;cursor:pointer;min-width:2rem;transition:background .2s;}
-#a11y-bar button:hover{background:#4F46E5;border-color:#818cf8;}
-#a11y-bar button:focus-visible{outline:2px solid #a5b4fc;outline-offset:2px;}
-[data-theme="dark"] #a11y-bar{background:#0f172a;}
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════ */
+:root{
+  --indigo:#4F46E5;--indigo-mid:#6366F1;--indigo-light:#A5B4FC;--indigo-pale:#EEF2FF;
+  --teal:#0D9488;--teal-light:#CCFBF1;--amber:#F59E0B;--amber-light:#FEF3C7;
+  --green:#059669;--green-light:#D1FAE5;--red:#DC2626;--red-light:#FEE2E2;
+  --bg:#F8FAFC;--surface:#FFFFFF;--border:#CBD5E1;
+  --text:#1E293B;--text-muted:#475569;--text-sub:#64748B;
+  --nav-bg:rgba(255,255,255,0.97);
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+  --display:'Fraunces',Georgia,serif;
+  --r-sm:8px;--r-md:12px;--r-lg:18px;--r-xl:24px;--r-full:999px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 16px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.06);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.07);
+  --shadow-indigo:0 8px 24px rgba(79,70,229,.30);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+[data-theme="dark"]{
+  --bg:#0F172A;--surface:#1E293B;--border:#334155;
+  --text:#F1F5F9;--text-muted:#CBD5E1;--text-sub:#94A3B8;
+  --nav-bg:rgba(15,23,42,0.97);
+  --indigo-pale:#1e1b4b;--teal-light:#0f3030;--amber-light:#3b2d0a;
+  --green-light:#052e16;--red-light:#1f0a0a;
+}
+
+/* ═══════════════════════════════════════════════
+RESET & BASE
+═══════════════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-size:16px;}
+body{
+font-family:var(–font);background:var(–bg);color:var(–text);
+line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+display:flex;flex-direction:column;min-height:100vh;
+transition:background .3s,color .3s;
+}
+main{flex:1 0 auto;}
+footer{flex-shrink:0;}
+a{color:var(–indigo);text-decoration:none;}
+a:hover{text-decoration:underline;}
+button{font-family:var(–font);cursor:pointer;border:none;background:none;}
+ul,ol{list-style:none;}
+img{max-width:100%;height:auto;display:block;}
+
+/* ── FOCUS ── */
+:focus-visible{
+outline:3px solid var(–indigo);
+outline-offset:3px;
+border-radius:var(–r-sm);
+}
+
+/* ── SKIP LINK ── */
+.skip-link{
+position:fixed;top:-120px;left:16px;
+background:var(–indigo);color:#fff;
+padding:10px 18px;border-radius:var(–r-md);
+font-size:.875rem;font-weight:700;z-index:9999;
+transition:top .2s;text-decoration:none;
+}
+.skip-link:focus{top:10px;}
+
+/* ═══════════════════════════════════════════════
+ACCESSIBILITY TOOLBAR
+═══════════════════════════════════════════════ */
+#a11y-bar{
+background:#1e293b;
+display:flex;align-items:center;gap:6px;
+flex-wrap:wrap;padding:5px 14px;
+border-bottom:2px solid var(–indigo);
+}
+#a11y-bar button{
+background:#334155;
+border:1.5px solid #64748b;
+color:#f1f5f9;
+border-radius:var(–r-sm);
+padding:5px 10px;
+font-size:.8rem;font-weight:700;
+cursor:pointer;min-width:2.2rem;
+transition:background .2s,border-color .2s,transform .15s;
+display:flex;align-items:center;justify-content:center;
+}
+#a11y-bar button:hover{
+background:var(–indigo);
+border-color:var(–indigo-light);
+transform:scale(1.08);
+}
+#a11y-bar button:focus-visible{
+outline:2px solid #a5b4fc;outline-offset:2px;
+}
+#a11y-bar button.a11y-active{
+background:var(–indigo);border-color:var(–indigo-light);color:#fff;
+}
+[data-theme=“dark”] #a11y-bar{background:#0f172a;}
 body.fs-lg{font-size:17px;}
 body.fs-xl{font-size:19px;}
-body.line-height-lg *{line-height:1.95!important;}
+body.line-height-lg *{line-height:2.0!important;}
+body.hc{filter:contrast(1.5);}
+
+/* ═══════════════════════════════════════════════
+NAVIGATION
+═══════════════════════════════════════════════ */
+#main-nav{
+position:sticky;top:0;z-index:500;
+background:var(–nav-bg);
+backdrop-filter:blur(16px);
+border-bottom:1px solid var(–border);
+transition:box-shadow .3s;
+}
+#main-nav.scrolled{box-shadow:var(–shadow-md);}
+.nav-inner{
+max-width:1100px;margin:0 auto;padding:0 20px;
+height:62px;display:flex;align-items:center;
+justify-content:space-between;gap:12px;
+}
+.nav-logo{
+display:flex;align-items:center;gap:10px;
+font-family:var(–display);font-size:1.1rem;font-weight:700;
+color:var(–indigo);white-space:nowrap;cursor:pointer;
+background:none;border:none;padding:4px;
+border-radius:var(–r-sm);
+transition:opacity .2s;
+}
+.nav-logo:hover{opacity:.85;}
+.logo-icon{
+width:34px;height:34px;border-radius:var(–r-sm);
+background:linear-gradient(135deg,var(–indigo),var(–teal));
+display:flex;align-items:center;justify-content:center;
+font-size:1.1rem;flex-shrink:0;
+}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nav-link{
+padding:7px 11px;border-radius:var(–r-sm);
+font-size:.875rem;font-weight:500;color:var(–text-muted);
+background:none;border:none;cursor:pointer;
+transition:all .2s;white-space:nowrap;
+}
+.nav-link:hover,.nav-link.active{
+color:var(–indigo);background:var(–indigo-pale);
+}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.lang-switcher-desktop{
+display:flex;gap:3px;
+background:var(–bg);border-radius:var(–r-full);
+padding:3px;border:1.5px solid var(–border);
+}
+.lang-btn{
+display:flex;align-items:center;gap:4px;
+padding:4px 10px;border-radius:var(–r-full);
+font-size:.75rem;font-weight:700;
+color:var(–text-muted);background:none;border:none;
+cursor:pointer;transition:all .2s;
+}
+.lang-btn:hover{color:var(–indigo);}
+.lang-btn.active{background:var(–indigo);color:#fff;}
+.ham{
+display:none;width:40px;height:40px;
+border-radius:var(–r-sm);color:var(–text);
+font-size:1.3rem;align-items:center;justify-content:center;
+background:none;border:1.5px solid var(–border);cursor:pointer;
+flex-shrink:0;transition:all .2s;
+}
+.ham:hover{background:var(–indigo-pale);border-color:var(–indigo);color:var(–indigo);}
+
+/* ═══════════════════════════════════════════════
+MOBILE DRAWER
+═══════════════════════════════════════════════ */
+.drawer-overlay{
+display:none;position:fixed;inset:0;
+background:rgba(0,0,0,.55);/* stärker, weniger transparent */
+z-index:498;backdrop-filter:blur(3px);
+}
+.drawer-overlay.open{display:block;}
+.mobile-drawer{
+position:fixed;top:0;right:-320px;bottom:0;width:290px;
+background:var(–surface);/* vollständig opak */
+z-index:499;
+box-shadow:-6px 0 32px rgba(0,0,0,.25);
+transition:right .32s var(–spring);
+display:flex;flex-direction:column;
+padding:18px 0 24px;overflow-y:auto;
+border-left:1px solid var(–border);
+}
+.mobile-drawer.open{right:0;}
+.drawer-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:0 18px 14px;
+border-bottom:1px solid var(–border);margin-bottom:8px;
+}
+.drawer-close{
+width:36px;height:36px;border-radius:var(–r-sm);
+background:var(–bg);color:var(–text);
+font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+cursor:pointer;border:1.5px solid var(–border);transition:all .2s;
+}
+.drawer-close:hover{background:var(–indigo-pale);color:var(–indigo);border-color:var(–indigo);}
+.drawer-links{
+display:flex;flex-direction:column;gap:3px;
+padding:4px 12px;flex:1;
+}
+.drawer-link{
+display:flex;align-items:center;gap:10px;
+padding:12px 14px;border-radius:var(–r-md);
+font-size:.95rem;font-weight:600;
+color:var(–text);/* dunkel, gut lesbar */
+background:none;border:none;cursor:pointer;
+text-align:left;transition:all .2s;
+}
+.drawer-link:hover,.drawer-link.active{
+background:var(–indigo-pale);color:var(–indigo);
+}
+.drawer-divider{
+height:1px;background:var(–border);margin:8px 14px;
+}
+.drawer-lang-label{
+font-size:.7rem;font-weight:700;letter-spacing:1px;
+text-transform:uppercase;color:var(–text-sub);
+padding:8px 26px 4px;
+}
+.drawer-langs{display:flex;gap:8px;padding:4px 14px 12px;}
+
+/* ═══════════════════════════════════════════════
+PAGES
+═══════════════════════════════════════════════ */
+.page{display:none;}
+.page.active{display:block;}
+.container{max-width:1060px;margin:0 auto;padding:0 20px;}
+.container-sm{max-width:720px;margin:0 auto;padding:0 20px;}
+.section{padding:64px 0;}
+.section-sm{padding:44px 0;}
+
+/* ═══════════════════════════════════════════════
+HERO
+═══════════════════════════════════════════════ */
+.hero{
+position:relative;min-height:calc(100vh - 100px);
+display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+text-align:center;overflow:hidden;
+}
+.hero-bg-img{
+position:absolute;inset:0;
+background-image:url(‘https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1600&q=80’);
+background-size:cover;background-position:center 30%;z-index:0;
+}
+.hero-bg{
+position:absolute;inset:0;
+background:linear-gradient(160deg,rgba(79,70,229,.88) 0%,rgba(13,148,136,.78) 55%,rgba(245,158,11,.62) 100%);
+z-index:1;
+}
+.hero-content{
+position:relative;z-index:2;
+padding:40px 20px;max-width:780px;
+animation:heroUp .8s var(–ease) both;
+}
+@keyframes heroUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+.hero-eyebrow{
+display:inline-flex;align-items:center;gap:7px;
+background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);
+border-radius:var(–r-full);padding:6px 16px;
+font-size:.72rem;font-weight:700;letter-spacing:1.4px;
+text-transform:uppercase;color:#fff;margin-bottom:22px;
+backdrop-filter:blur(8px);
+}
+.hero h1{
+font-family:var(–display);
+font-size:clamp(2.2rem,6vw,4.2rem);
+font-weight:900;color:#fff;line-height:1.06;
+margin-bottom:18px;text-shadow:0 2px 20px rgba(0,0,0,.2);
+}
+.hero h1 em{font-style:italic;color:#FDE68A;}
+.hero-desc{
+font-size:clamp(.9rem,2vw,1.05rem);
+color:rgba(255,255,255,.93);
+max-width:600px;margin:0 auto 38px;line-height:1.75;
+background:rgba(0,0,0,.18);border-radius:var(–r-lg);
+padding:18px 24px;border:1px solid rgba(255,255,255,.2);
+backdrop-filter:blur(6px);
+}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+
+/* ═══════════════════════════════════════════════
+BUTTONS
+═══════════════════════════════════════════════ */
+.btn{
+display:inline-flex;align-items:center;justify-content:center;gap:8px;
+font-family:var(–font);font-size:.9375rem;font-weight:600;
+padding:12px 24px;border-radius:var(–r-md);border:none;
+cursor:pointer;transition:all .22s var(–ease);
+white-space:nowrap;text-decoration:none;
+}
+.btn:focus-visible{outline:3px solid currentColor;outline-offset:3px;}
+.btn-primary{
+background:linear-gradient(135deg,var(–indigo),var(–indigo-mid));
+color:#fff;box-shadow:var(–shadow-indigo);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(79,70,229,.4);}
+.btn-white{background:rgba(255,255,255,.96);color:var(–indigo);}
+.btn-white:hover{background:#fff;transform:translateY(-2px);box-shadow:var(–shadow-lg);}
+.btn-outline{background:transparent;border:2px solid rgba(255,255,255,.7);color:#fff;}
+.btn-outline:hover{background:rgba(255,255,255,.15);border-color:#fff;}
+.btn-ghost{
+background:transparent;
+border:1.5px solid var(–border);
+color:var(–text-muted);
+}
+.btn-ghost:hover{border-color:var(–indigo);color:var(–indigo);background:var(–indigo-pale);}
+.btn-cert{background:linear-gradient(135deg,var(–green),#047857);color:#fff;}
+.btn-cert:hover{transform:translateY(-2px);}
+.btn-sm{padding:8px 16px;font-size:.8125rem;}
+.btn-lg{padding:15px 32px;font-size:1rem;border-radius:var(–r-lg);}
+
+/* ═══════════════════════════════════════════════
+SECTION HEADER
+═══════════════════════════════════════════════ */
+.sec-header{text-align:center;margin-bottom:48px;}
+.sec-label{
+display:inline-block;font-size:.7rem;font-weight:700;
+letter-spacing:1.8px;text-transform:uppercase;
+color:var(–indigo);background:var(–indigo-pale);
+padding:5px 14px;border-radius:var(–r-full);margin-bottom:12px;
+}
+.sec-title{
+font-family:var(–display);
+font-size:clamp(1.5rem,4vw,2.4rem);
+font-weight:900;color:var(–text);line-height:1.2;margin-bottom:12px;
+}
+.sec-sub{
+font-size:1rem;color:var(–text-muted);
+max-width:540px;margin:0 auto;line-height:1.7;
+}
+
+/* ═══════════════════════════════════════════════
+FEATURE CARDS – animiert, mit Rahmen
+═══════════════════════════════════════════════ */
+.feature-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:20px;
+}
+.feature-card{
+background:var(–surface);
+border:2px solid var(–border);/* sichtbarer Rahmen */
+border-radius:var(–r-lg);
+padding:28px 24px;
+transition:transform .3s var(–ease),box-shadow .3s,border-color .3s;
+position:relative;overflow:hidden;
+animation:cardFadeIn .5s var(–ease) both;
+}
+.feature-card:nth-child(1){animation-delay:.05s;}
+.feature-card:nth-child(2){animation-delay:.12s;}
+.feature-card:nth-child(3){animation-delay:.19s;}
+.feature-card:nth-child(4){animation-delay:.26s;}
+@keyframes cardFadeIn{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
+}
+.feature-card::before{
+content:’’;position:absolute;top:0;left:0;right:0;height:3px;
+background:linear-gradient(90deg,var(–indigo),var(–teal));
+transform:scaleX(0);transform-origin:left;
+transition:transform .35s var(–ease);
+}
+.feature-card:hover{
+transform:translateY(-6px);
+box-shadow:var(–shadow-lg);
+border-color:var(–indigo);
+}
+.feature-card:hover::before{transform:scaleX(1);}
+.feature-icon{
+width:52px;height:52px;border-radius:var(–r-md);
+display:flex;align-items:center;justify-content:center;
+font-size:1.5rem;margin-bottom:16px;
+transition:transform .3s var(–spring);
+}
+.feature-card:hover .feature-icon{transform:scale(1.12) rotate(-5deg);}
+.icon-indigo{background:var(–indigo-pale);}
+.icon-teal{background:var(–teal-light);}
+.icon-amber{background:var(–amber-light);}
+.icon-green{background:var(–green-light);}
+.feature-card h3{font-size:1rem;font-weight:700;color:var(–text);margin-bottom:8px;}
+.feature-card p{font-size:.875rem;color:var(–text-muted);line-height:1.65;}
+
+/* STATS BAR */
+.stats-bar{
+background:linear-gradient(135deg,var(–indigo),var(–teal));
+border-radius:var(–r-xl);padding:36px 40px;
+display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+gap:20px;text-align:center;margin:44px 0;
+}
+.stat-num{font-family:var(–display);font-size:2.1rem;font-weight:900;color:#fff;line-height:1;margin-bottom:5px;}
+.stat-label{font-size:.78rem;color:rgba(255,255,255,.85);font-weight:500;}
+
+/* ═══════════════════════════════════════════════
+TOPIC CARDS
+═══════════════════════════════════════════════ */
+.topic-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+gap:18px;
+}
+.topic-card{
+background:var(–surface);
+border:2px solid var(–border);
+border-radius:var(–r-lg);
+padding:28px 20px;cursor:pointer;
+transition:all .28s var(–ease);text-align:center;
+}
+.topic-card:hover{
+transform:translateY(-5px);
+box-shadow:var(–shadow-lg);border-color:var(–indigo);
+}
+.topic-icon-wrap{
+width:68px;height:68px;background:var(–indigo-pale);
+border-radius:var(–r-lg);display:flex;
+align-items:center;justify-content:center;
+font-size:2rem;margin:0 auto 16px;
+transition:transform .3s var(–spring);
+}
+.topic-card:hover .topic-icon-wrap{transform:scale(1.1) rotate(-4deg);}
+.topic-card h3{font-size:1rem;font-weight:700;color:var(–text);margin-bottom:7px;}
+.topic-card p{font-size:.8125rem;color:var(–text-muted);line-height:1.55;margin-bottom:10px;}
+.topic-meta{font-size:.8rem;font-weight:600;color:var(–indigo);}
+
+/* ═══════════════════════════════════════════════
+LEVEL / QUIZ CARD
+═══════════════════════════════════════════════ */
+.level-grid{margin-top:20px;}
+.level-card{
+background:var(–surface);
+border:2px solid var(–border);
+border-radius:var(–r-lg);
+padding:28px 24px;
+transition:all .25s var(–ease);
+}
+.level-card:hover{border-color:var(–indigo);box-shadow:var(–shadow-md);}
+.lc-icon{font-size:2rem;margin-bottom:10px;}
+.level-card h3{font-size:1rem;font-weight:700;color:var(–text);margin-bottom:6px;}
+.level-card p{font-size:.875rem;color:var(–text-muted);line-height:1.55;}
+.level-stars{margin-top:10px;font-size:.9rem;}
+
+/* RANK LADDER */
+.rank-ladder{
+display:flex;align-items:flex-start;justify-content:center;
+flex-wrap:wrap;
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-lg);padding:16px 12px;margin-bottom:24px;
+overflow-x:auto;
+}
+.rank-step{
+display:flex;flex-direction:column;align-items:center;
+gap:4px;opacity:.28;transition:all .35s;min-width:50px;
+}
+.rank-step.unlocked,.rank-step.current{opacity:1;}
+.rank-step.current .rs-icon{
+background:linear-gradient(135deg,var(–indigo),var(–teal));
+color:#fff;transform:scale(1.14);
+}
+.rs-icon{
+width:34px;height:34px;border-radius:var(–r-sm);
+background:var(–bg);display:flex;
+align-items:center;justify-content:center;
+font-size:1rem;transition:all .35s;
+}
+.rs-lbl{
+font-size:.48rem;font-weight:700;letter-spacing:.8px;
+text-transform:uppercase;color:var(–text-sub);text-align:center;
+}
+.rank-step.current .rs-lbl{color:var(–indigo);}
+.rank-conn{width:22px;height:2px;background:var(–border);margin-top:15px;flex-shrink:0;}
+.rank-conn.filled{background:linear-gradient(90deg,var(–indigo),var(–teal));}
+
+/* ═══════════════════════════════════════════════
+QUIZ
+═══════════════════════════════════════════════ */
+.quiz-wrap{max-width:740px;margin:0 auto;}
+.quiz-topbar{
+display:flex;align-items:center;justify-content:space-between;
+margin-bottom:18px;flex-wrap:wrap;gap:10px;
+}
+.quiz-title{
+font-family:var(–display);font-size:1.1rem;
+font-weight:700;color:var(–text);
+}
+.quiz-pills{display:flex;gap:8px;}
+.pill{
+background:var(–indigo-pale);border-radius:var(–r-full);
+padding:5px 13px;font-size:.78rem;font-weight:600;color:var(–indigo);
+border:1px solid var(–indigo-light);
+}
+.pill-teal{background:var(–teal-light);color:var(–teal);border-color:var(–teal);}
+.prog-bar{
+width:100%;height:7px;background:var(–border);
+border-radius:var(–r-full);margin-bottom:24px;overflow:hidden;
+}
+.prog-fill{
+height:100%;
+background:linear-gradient(90deg,var(–indigo),var(–teal));
+border-radius:var(–r-full);transition:width .5s var(–ease);
+}
+
+/* FRAGEN-KARTE – sichtbarer Rahmen */
+.question-card{
+background:var(–surface);
+border:2px solid var(–indigo-light);/* farbiger Rahmen */
+border-radius:var(–r-xl);
+padding:28px 24px;margin-bottom:16px;
+box-shadow:var(–shadow-sm);
+}
+.q-num{
+font-size:.72rem;font-weight:700;letter-spacing:1.5px;
+text-transform:uppercase;color:var(–indigo);margin-bottom:10px;
+}
+.q-text{
+font-size:clamp(.95rem,2.5vw,1.15rem);
+font-weight:600;line-height:1.55;color:var(–text);
+}
+
+/* ANTWORT-BUTTONS – sichtbar mit Rahmen */
+.answers{display:grid;gap:10px;margin-bottom:18px;}
+.answer-btn{
+background:var(–surface);
+border:2px solid var(–border);/* deutlicher Rahmen */
+border-radius:var(–r-md);
+padding:14px 18px;text-align:left;
+font-family:var(–font);font-size:.9375rem;
+font-weight:500;
+color:var(–text);/* dunkle, gut lesbare Farbe */
+transition:all .22s;
+display:flex;align-items:flex-start;gap:12px;
+line-height:1.45;cursor:pointer;
+box-shadow:var(–shadow-sm);
+}
+.answer-btn:hover:not(:disabled){
+border-color:var(–indigo);
+background:var(–indigo-pale);
+color:var(–indigo);
+transform:translateX(4px);
+box-shadow:var(–shadow-md);
+}
+.answer-btn:focus-visible{
+outline:3px solid var(–indigo);
+outline-offset:2px;
+}
+.answer-btn:disabled{cursor:default;}
+.answer-btn.correct{
+border-color:var(–green);background:var(–green-light);color:#065F46;
+box-shadow:0 0 0 3px rgba(5,150,105,.15);
+}
+.answer-btn.wrong{
+border-color:var(–red);background:var(–red-light);color:#991B1B;
+box-shadow:0 0 0 3px rgba(220,38,38,.15);
+}
+.answer-btn.missed{border-color:var(–green);border-style:dashed;}
+.answer-letter{
+display:inline-flex;align-items:center;justify-content:center;
+width:28px;height:28px;min-width:28px;
+border-radius:var(–r-sm);
+background:var(–indigo-pale);
+font-size:.8rem;font-weight:700;color:var(–indigo);
+flex-shrink:0;margin-top:1px;
+}
+.answer-btn.correct .answer-letter{background:rgba(5,150,105,.2);color:#065F46;}
+.answer-btn.wrong   .answer-letter{background:rgba(220,38,38,.2);color:#991B1B;}
+
+/* ERKLÄRUNG */
+.explanation{
+background:var(–amber-light);
+border:2px solid var(–amber);
+border-left:5px solid var(–amber);
+border-radius:0 var(–r-md) var(–r-md) 0;
+padding:14px 18px;font-size:.875rem;line-height:1.65;
+color:#78350F;margin-bottom:16px;
+animation:fadeIn .3s var(–ease);
+}
+[data-theme=“dark”] .explanation{background:#2d2000;color:#fde68a;border-color:#d97706;}
+.error-msg{
+background:var(–red-light);border:2px solid var(–red);
+border-radius:var(–r-md);padding:10px 16px;
+font-size:.875rem;font-weight:600;color:#991B1B;margin-bottom:12px;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+.nav-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;}
+.back-btn{
+display:inline-flex;align-items:center;gap:6px;
+color:var(–text-muted);font-size:.875rem;font-weight:500;
+padding:7px 0;margin-bottom:16px;
+cursor:pointer;background:none;border:none;
+transition:color .2s;
+}
+.back-btn:hover{color:var(–indigo);}
+
+/* ═══════════════════════════════════════════════
+RESULT
+═══════════════════════════════════════════════ */
+.result-wrap{
+text-align:center;padding:36px 16px;
+max-width:560px;margin:0 auto;
+}
+.result-medal{
+font-size:88px;display:block;margin-bottom:12px;
+animation:medalPop .65s var(–spring) both;
+}
+@keyframes medalPop{
+0%{transform:scale(0) rotate(-20deg);opacity:0;}
+100%{transform:scale(1);opacity:1;}
+}
+.result-title{
+font-family:var(–display);
+font-size:clamp(1.4rem,4vw,2.1rem);
+font-weight:900;color:var(–text);margin-bottom:5px;
+}
+.result-rank-lbl{font-size:.95rem;color:var(–text-muted);margin-bottom:20px;}
+.result-rank-lbl strong{color:var(–indigo);}
+.rating-badge{
+display:inline-block;background:var(–indigo-pale);
+color:var(–indigo);font-size:.875rem;font-weight:700;
+padding:5px 16px;border-radius:var(–r-full);
+border:1px solid var(–indigo-light);margin-bottom:20px;
+}
+.score-ring{
+width:130px;height:130px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+margin:0 auto 22px;position:relative;
+transition:background 1.2s var(–ease);
+}
+.score-ring::before{
+content:’’;position:absolute;inset:11px;
+border-radius:50%;background:var(–bg);
+}
+.score-num{
+position:relative;z-index:1;
+font-family:var(–display);font-size:1.9rem;
+font-weight:900;color:var(–indigo);
+}
+.score-num small{font-size:.85rem;color:var(–text-muted);font-family:var(–font);}
+.stats-row{
+display:flex;justify-content:center;gap:12px;
+margin-bottom:22px;flex-wrap:wrap;
+}
+.stat-box{
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-md);padding:14px 18px;min-width:95px;
+box-shadow:var(–shadow-sm);
+}
+.stat-v{font-family:var(–display);font-size:1.6rem;font-weight:700;color:var(–text);}
+.stat-l{font-size:.72rem;color:var(–text-muted);margin-top:2px;}
+.rank-up-banner{
+background:var(–indigo-pale);border:1.5px solid var(–indigo-light);
+border-radius:var(–r-lg);padding:12px 18px;
+margin-bottom:16px;font-size:.9rem;color:var(–indigo);font-weight:600;
+}
+.name-input-wrap{
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-lg);padding:18px;margin-bottom:16px;
+text-align:left;box-shadow:var(–shadow-sm);
+}
+.name-input-wrap label{
+display:block;font-size:.8125rem;font-weight:600;
+color:var(–text-muted);margin-bottom:7px;
+}
+.name-input{
+width:100%;background:var(–bg);
+border:2px solid var(–border);border-radius:var(–r-sm);
+padding:10px 13px;font-family:var(–font);
+font-size:.9375rem;color:var(–text);outline:none;
+transition:border-color .2s;
+}
+.name-input:focus{border-color:var(–indigo);}
+.name-input::placeholder{color:var(–text-sub);}
+.result-btns{
+display:flex;gap:9px;justify-content:center;
+flex-wrap:wrap;margin-top:8px;
+}
+.share-strip{
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-lg);padding:16px 18px;margin-bottom:14px;text-align:left;
+}
+.share-strip h3{font-size:.9rem;font-weight:700;color:var(–text);margin-bottom:10px;}
+.share-btns{display:flex;gap:7px;flex-wrap:wrap;}
+.share-btn{
+display:inline-flex;align-items:center;gap:5px;
+padding:7px 13px;border-radius:var(–r-sm);
+font-size:.8rem;font-weight:600;cursor:pointer;
+border:none;transition:all .2s;
+}
+.share-wa{background:#25D366;color:#fff;}.share-wa:hover{background:#1ebe57;}
+.share-li{background:#0A66C2;color:#fff;}.share-li:hover{background:#0958a8;}
+.share-cp{background:var(–bg);color:var(–text);border:1.5px solid var(–border);}
+.share-cp:hover{background:var(–border);}
+
+/* ═══════════════════════════════════════════════
+ABOUT / CERT / LEGAL / DASHBOARD
+═══════════════════════════════════════════════ */
+.about-steps{display:flex;flex-direction:column;}
+.about-step{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid var(–border);}
+.about-step:last-child{border-bottom:none;}
+.step-num{
+width:40px;height:40px;border-radius:50%;
+background:linear-gradient(135deg,var(–indigo),var(–teal));
+color:#fff;font-size:.95rem;font-weight:800;
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+font-family:var(–display);
+}
+.step-body h3{font-size:.95rem;font-weight:700;color:var(–text);margin-bottom:4px;}
+.step-body p{font-size:.875rem;color:var(–text-muted);line-height:1.65;}
+.cert-tiers{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(165px,1fr));
+gap:13px;margin:26px 0;
+}
+.cert-tier-card{
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-lg);padding:24px 16px;text-align:center;
+transition:all .25s;
+}
+.cert-tier-card:hover{transform:translateY(-4px);box-shadow:var(–shadow-md);border-color:var(–indigo);}
+.ct-medal{font-size:2.5rem;margin-bottom:9px;}
+.cert-tier-card h3{font-size:.875rem;font-weight:700;color:var(–text);margin-bottom:4px;}
+.cert-tier-card p{font-size:.78rem;color:var(–text-muted);}
+.premium-box{
+background:var(–indigo-pale);border:2px solid var(–indigo-light);
+border-radius:var(–r-xl);padding:36px 28px;text-align:center;margin-top:28px;
+}
+.premium-box h3{font-family:var(–display);font-size:1.4rem;color:var(–indigo);margin-bottom:9px;}
+.premium-box p{color:var(–text-muted);font-size:.9rem;max-width:480px;margin:0 auto 20px;line-height:1.65;}
+.am-grid{display:grid;grid-template-columns:200px 1fr;gap:44px;align-items:start;}
+.am-av-wrap{text-align:center;}
+.am-av{
+width:155px;height:155px;border-radius:50%;
+background:linear-gradient(135deg,var(–indigo-pale),#E0E7FF);
+border:3px solid var(–border);display:flex;
+align-items:center;justify-content:center;
+font-size:68px;margin:0 auto 12px;
+}
+.am-tags{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+.tag{
+background:var(–indigo-pale);color:var(–indigo);
+font-size:.72rem;font-weight:600;
+padding:4px 11px;border-radius:var(–r-full);
+}
+.am-quote{
+background:var(–bg);border-left:4px solid var(–indigo);
+border-radius:0 var(–r-md) var(–r-md) 0;
+padding:18px 20px;font-size:.9rem;font-style:italic;
+line-height:1.75;color:var(–text-muted);margin:16px 0;
+}
+.am-text{font-size:.9rem;color:var(–text-muted);line-height:1.8;margin-bottom:12px;}
+.dash-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;margin-top:24px;}
+.dash-sidebar{
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-xl);padding:22px 18px;height:fit-content;
+}
+.user-av{
+width:64px;height:64px;border-radius:50%;
+background:linear-gradient(135deg,var(–indigo),var(–teal));
+display:flex;align-items:center;justify-content:center;
+font-size:1.75rem;color:#fff;margin:0 auto 10px;
+font-family:var(–display);font-weight:900;
+}
+.dash-name{font-size:1rem;font-weight:700;text-align:center;color:var(–text);margin-bottom:3px;}
+.dash-email{font-size:.78rem;color:var(–text-muted);text-align:center;margin-bottom:16px;}
+.dash-stat-row{display:flex;gap:8px;margin-bottom:16px;}
+.dash-mini{flex:1;background:var(–bg);border-radius:var(–r-md);padding:10px;text-align:center;border:1px solid var(–border);}
+.dash-mini .val{font-size:1.3rem;font-weight:800;color:var(–indigo);font-family:var(–display);}
+.dash-mini .lbl{font-size:.6rem;color:var(–text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.xp-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.xp-lbl{font-size:.72rem;color:var(–text-muted);white-space:nowrap;}
+.xp-bar{flex:1;height:7px;background:var(–border);border-radius:var(–r-full);overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(–indigo),var(–teal));border-radius:var(–r-full);transition:width 1s;}
+.dash-card{
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-xl);padding:22px;margin-bottom:16px;
+}
+.dash-card h3{font-size:.95rem;font-weight:700;color:var(–text);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.cert-item{
+display:flex;align-items:center;gap:10px;
+padding:11px 13px;background:var(–bg);
+border:1.5px solid var(–border);border-radius:var(–r-md);
+margin-bottom:8px;transition:all .2s;
+}
+.cert-item:hover{border-color:var(–indigo);background:var(–indigo-pale);}
+.ci-medal{font-size:1.5rem;flex-shrink:0;}
+.ci-info{flex:1;}
+.ci-name{font-size:.875rem;font-weight:600;color:var(–text);}
+.ci-date{font-size:.72rem;color:var(–text-muted);}
+.ci-pct{font-size:.875rem;font-weight:700;color:var(–indigo);}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:9px;}
+.ach{
+background:var(–bg);border:1.5px solid var(–border);
+border-radius:var(–r-md);padding:11px 8px;text-align:center;transition:all .2s;
+}
+.ach.earned{background:var(–indigo-pale);border-color:var(–indigo-light);}
+.ach-icon{font-size:1.5rem;margin-bottom:4px;filter:grayscale(1);}
+.ach.earned .ach-icon{filter:none;}
+.ach-name{font-size:.65rem;font-weight:600;color:var(–text-muted);}
+.ach.earned .ach-name{color:var(–indigo);}
+.legal-tabs{display:flex;gap:7px;margin-bottom:22px;flex-wrap:wrap;}
+.legal-tab{
+background:var(–surface);border:2px solid var(–border);
+border-radius:var(–r-sm);padding:8px 15px;
+font-size:.8rem;font-weight:600;color:var(–text-muted);cursor:pointer;transition:all .2s;
+}
+.legal-tab:hover{border-color:var(–indigo);color:var(–indigo);}
+.legal-tab.active{background:var(–indigo);border-color:var(–indigo);color:#fff;}
+.legal-content h3{font-size:1.05rem;font-weight:700;color:var(–text);margin:20px 0 7px;}
+.legal-content h3:first-child{margin-top:0;}
+.legal-content p,.legal-content li{font-size:.875rem;color:var(–text-muted);line-height:1.85;}
+.legal-content ul{padding-left:18px;margin:7px 0;list-style:disc;}
+
+/* ═══════════════════════════════════════════════
+AUTH MODAL
+═══════════════════════════════════════════════ */
+.modal-overlay{
+position:fixed;inset:0;
+background:rgba(0,0,0,.6);backdrop-filter:blur(6px);
+z-index:800;display:none;align-items:center;
+justify-content:center;padding:16px;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+background:var(–surface);border-radius:var(–r-xl);
+padding:36px 28px;width:100%;max-width:420px;
+box-shadow:0 24px 64px rgba(0,0,0,.2);
+animation:mSlide .3s var(–spring);position:relative;
+border:2px solid var(–border);
+}
+@keyframes mSlide{from{transform:translateY(18px) scale(.97);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+.modal-close{
+position:absolute;top:14px;right:14px;
+width:30px;height:30px;border-radius:var(–r-sm);
+background:var(–bg);color:var(–text-muted);
+font-size:1rem;display:flex;align-items:center;justify-content:center;
+cursor:pointer;border:1.5px solid var(–border);transition:all .2s;
+}
+.modal-close:hover{background:var(–indigo-pale);color:var(–indigo);border-color:var(–indigo);}
+.modal-logo{text-align:center;margin-bottom:20px;}
+.logo-big{
+width:52px;height:52px;
+background:linear-gradient(135deg,var(–indigo),var(–teal));
+border-radius:var(–r-md);display:flex;
+align-items:center;justify-content:center;
+font-size:1.6rem;margin:0 auto 10px;
+}
+.modal-logo h2{font-family:var(–display);font-size:1.2rem;font-weight:900;color:var(–text);}
+.modal-logo p{font-size:.8125rem;color:var(–text-muted);margin-top:3px;}
+.modal-tabs{
+display:flex;background:var(–bg);border-radius:var(–r-md);
+padding:4px;margin-bottom:20px;border:1.5px solid var(–border);
+}
+.modal-tab{
+flex:1;padding:8px;border-radius:var(–r-sm);
+font-size:.8125rem;font-weight:600;color:var(–text-muted);
+background:none;border:none;cursor:pointer;transition:all .2s;
+}
+.modal-tab.active{background:var(–surface);color:var(–indigo);box-shadow:var(–shadow-sm);}
+.modal-form{display:flex;flex-direction:column;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group label{font-size:.78rem;font-weight:600;color:var(–text-muted);}
+.form-group input{
+padding:10px 12px;border:2px solid var(–border);
+border-radius:var(–r-sm);font-family:var(–font);
+font-size:.9375rem;color:var(–text);background:var(–bg);
+outline:none;transition:all .2s;
+}
+.form-group input:focus{border-color:var(–indigo);box-shadow:0 0 0 3px rgba(79,70,229,.12);}
+.form-note{font-size:.72rem;color:var(–text-sub);}
+.modal-divider{
+display:flex;align-items:center;gap:8px;
+font-size:.72rem;color:var(–text-sub);margin:3px 0;
+}
+.modal-divider::before,.modal-divider::after{content:’’;flex:1;height:1px;background:var(–border);}
+.btn-social{
+display:flex;align-items:center;gap:9px;
+padding:10px 12px;border:2px solid var(–border);
+border-radius:var(–r-sm);background:var(–surface);
+color:var(–text);font-size:.875rem;font-weight:600;
+cursor:pointer;transition:all .2s;width:100%;font-family:var(–font);
+}
+.btn-social:hover{border-color:var(–indigo);background:var(–indigo-pale);color:var(–indigo);}
+
+/* ═══════════════════════════════════════════════
+FOOTER
+═══════════════════════════════════════════════ */
+footer{
+background:#0F172A;color:rgba(255,255,255,.72);
+padding:44px 0 24px;
+}
+.footer-inner{max-width:1060px;margin:0 auto;padding:0 20px;}
+.footer-grid{
+display:grid;grid-template-columns:2fr 1fr 1fr;
+gap:36px;margin-bottom:32px;
+}
+.footer-brand h2{font-family:var(–display);font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:8px;}
+.footer-brand p{font-size:.8125rem;line-height:1.7;max-width:260px;}
+.footer-col h3{font-size:.7rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:11px;}
+.footer-col ul{display:flex;flex-direction:column;gap:7px;}
+.footer-col ul li a,.footer-col ul li button{
+font-size:.8125rem;color:rgba(255,255,255,.6);
+transition:color .2s;background:none;border:none;
+cursor:pointer;font-family:var(–font);text-align:left;padding:0;
+}
+.footer-col ul li a:hover,.footer-col ul li button:hover{color:#fff;}
+.footer-bottom{
+border-top:1px solid rgba(255,255,255,.12);
+padding-top:20px;display:flex;align-items:center;
+justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.footer-bottom p{font-size:.78rem;}
+.footer-links{display:flex;gap:14px;}
+.footer-links a,.footer-links button{
+font-size:.78rem;color:rgba(255,255,255,.5);
+transition:color .2s;background:none;border:none;cursor:pointer;font-family:var(–font);
+}
+.footer-links a:hover,.footer-links button:hover{color:#fff;}
+
+/* TOAST */
+.toast{
+position:fixed;bottom:20px;left:50%;
+transform:translateX(-50%) translateY(80px);
+background:#1E293B;color:#fff;border-radius:var(–r-md);
+padding:12px 20px;font-size:.875rem;font-weight:500;
+z-index:999;transition:transform .4s var(–spring);
+white-space:nowrap;box-shadow:var(–shadow-lg);
+border:1px solid rgba(255,255,255,.1);
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* CONFETTI */
+.cp{
+position:fixed;pointer-events:none;z-index:1000;
+border-radius:2px;animation:cf linear forwards;
+}
+@keyframes cf{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(105vh) rotate(720deg);opacity:0;}}
+
+/* ═══════════════════════════════════════════════
+RESPONSIVE
+═══════════════════════════════════════════════ */
+@media(max-width:900px){
+.dash-grid{grid-template-columns:1fr;}
+.am-grid{grid-template-columns:1fr;}
+.footer-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:700px){
+.nav-links,.lang-switcher-desktop,.nav-right .btn-primary{display:none;}
+.ham{display:flex;}
+.footer-grid{grid-template-columns:1fr;gap:22px;}
+.question-card{padding:20px 14px;}
+.answer-btn{font-size:.875rem;padding:12px 13px;}
+.modal{padding:24px 16px;}
+.section{padding:44px 0;}
+.stats-bar{padding:22px 16px;}
+}
+@media(max-width:480px){
+.hero h1{font-size:1.9rem;}
+.hero-btns{flex-direction:column;align-items:center;}
+.result-btns{flex-direction:column;align-items:center;}
+.result-btns .btn{width:100%;max-width:280px;}
+.share-btns{flex-direction:column;}
+.stats-row{gap:8px;}
+}
+@media(prefers-reduced-motion:reduce){
+*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+}
 </style>
+
 </head>
 <body>
 
@@ -28,21 +985,21 @@ body.line-height-lg *{line-height:1.95!important;}
 
 <!-- ACCESSIBILITY BAR -->
 
-<div id="a11y-bar" role="toolbar" aria-label="Barrierefreiheit">
-  <button id="a11y-normal" title="Normale Schriftgröße" aria-label="Normale Schriftgröße">A</button>
-  <button id="a11y-lg"     title="Schrift größer"       aria-label="Schrift größer">A+</button>
-  <button id="a11y-xl"     title="Schrift sehr groß"    aria-label="Schrift sehr groß">A++</button>
-  <button id="a11y-theme"    title="Hell/Dunkel"        aria-label="Hell-Dunkel-Modus">🌙</button>
-  <button id="a11y-contrast" title="Hoher Kontrast"     aria-label="Hoher Kontrast">◑</button>
-  <button id="a11y-lh"       title="Zeilenabstand"      aria-label="Zeilenabstand">↕</button>
-  <button id="a11y-reset"    title="Zurücksetzen"        aria-label="Zurücksetzen">✕</button>
+<div id="a11y-bar" role="toolbar" aria-label="Barrierefreiheit-Einstellungen">
+  <button id="a11y-normal"   title="Normale Schrift (16px)"  aria-label="Normale Schriftgröße">A</button>
+  <button id="a11y-lg"       title="Größere Schrift (17px)"  aria-label="Schrift vergrößern">A+</button>
+  <button id="a11y-xl"       title="Sehr große Schrift (19px)"aria-label="Schrift sehr groß">A++</button>
+  <button id="a11y-theme"    title="Hell/Dunkel-Modus"        aria-label="Dunkel-Modus">🌙</button>
+  <button id="a11y-contrast" title="Hoher Kontrast"           aria-label="Hoher Kontrast">◑</button>
+  <button id="a11y-lh"       title="Mehr Zeilenabstand"       aria-label="Zeilenabstand erhöhen">↕</button>
+  <button id="a11y-reset"    title="Einstellungen zurücksetzen"aria-label="Zurücksetzen">✕</button>
 </div>
 
 <!-- NAV -->
 
 <nav id="main-nav" role="navigation" aria-label="Hauptnavigation">
   <div class="nav-inner">
-    <button class="nav-logo" id="logo-btn" aria-label="Startseite">
+    <button class="nav-logo" id="logo-btn" aria-label="Upskill Academy – Startseite">
       <span class="logo-icon" aria-hidden="true">🎓</span>
       <span>Upskill Academy</span>
     </button>
@@ -54,7 +1011,7 @@ body.line-height-lg *{line-height:1.95!important;}
       <button class="nav-link"        role="menuitem" data-page="about-me"       data-i18n="navAbout">Über mich</button>
     </div>
     <div class="nav-right">
-      <div class="lang-switcher-desktop" role="group" aria-label="Sprache">
+      <div class="lang-switcher-desktop" role="group" aria-label="Sprache wählen">
         <button class="lang-btn active" id="btn-de" aria-pressed="true"  aria-label="Deutsch">🇩🇪 DE</button>
         <button class="lang-btn"        id="btn-en" aria-pressed="false" aria-label="English">🇬🇧 EN</button>
         <button class="lang-btn"        id="btn-es" aria-pressed="false" aria-label="Español">🇪🇸 ES</button>
@@ -65,15 +1022,18 @@ body.line-height-lg *{line-height:1.95!important;}
   </div>
 </nav>
 
-<!-- DRAWER -->
+<!-- DRAWER OVERLAY -->
 
 <div class="drawer-overlay" id="drawer-overlay"></div>
+
+<!-- MOBILE DRAWER -->
+
 <nav class="mobile-drawer" id="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobilmenü">
   <div class="drawer-header">
     <button class="nav-logo" id="logo-drawer-btn" aria-label="Startseite">
       <span class="logo-icon" aria-hidden="true">🎓</span><span>Upskill Academy</span>
     </button>
-    <button class="drawer-close" id="drawer-close-btn" aria-label="Schließen">✕</button>
+    <button class="drawer-close" id="drawer-close-btn" aria-label="Menü schließen">✕</button>
   </div>
   <div class="drawer-links">
     <button class="drawer-link" data-page="home"           data-i18n="navHome"><span aria-hidden="true">🏠</span> Home</button>
@@ -95,7 +1055,7 @@ body.line-height-lg *{line-height:1.95!important;}
 
 <main id="main-content" tabindex="-1">
 
-<!-- ══ HOME ══ -->
+<!-- HOME -->
 
 <div class="page active" id="page-home">
   <header class="hero" role="banner">
@@ -104,7 +1064,7 @@ body.line-height-lg *{line-height:1.95!important;}
     <div class="hero-content">
       <span class="hero-eyebrow">✨ <span data-i18n="heroBadge">Interaktives Lernen</span></span>
       <h1>Upskill<br><em data-i18n="heroTitle">Academy</em></h1>
-      <div class="hero-desc"><p data-i18n="heroDesc">Interaktive Lernplattform für HR, Gehaltsabrechnung und mehr – auch am Smartphone.</p></div>
+      <div class="hero-desc"><p data-i18n="heroDesc">Interaktive Lernplattform für HR, Gehaltsabrechnung und mehr.</p></div>
       <div class="hero-btns">
         <button class="btn btn-white btn-lg"   id="btn-hero-quiz" data-i18n="heroQuiz">🚀 Zum Quiz</button>
         <button class="btn btn-outline btn-lg" id="btn-hero-more" data-i18n="heroMore">Mehr erfahren</button>
@@ -119,10 +1079,10 @@ body.line-height-lg *{line-height:1.95!important;}
         <p class="sec-sub" data-i18n="featSub">Entwickelt für Kursteilnehmer in Weiterbildungsprogrammen.</p>
       </div>
       <div class="feature-grid" role="list">
-        <article class="feature-card" role="listitem"><div class="feature-icon icon-indigo" aria-hidden="true">⚡</div><h3 data-i18n="f1T">Sofortiges Feedback</h3><p data-i18n="f1P">Nach jeder Antwort siehst du direkt ob du richtig lagst.</p></article>
-        <article class="feature-card" role="listitem"><div class="feature-icon icon-teal"   aria-hidden="true">📱</div><h3 data-i18n="f2T">Lernen unterwegs</h3><p data-i18n="f2P">Optimiert für Smartphone und Tablet.</p></article>
-        <article class="feature-card" role="listitem"><div class="feature-icon icon-amber"  aria-hidden="true">🎯</div><h3 data-i18n="f3T">Praxisnah</h3><p data-i18n="f3P">Echte Inhalte aus Weiterbildungskursen.</p></article>
-        <article class="feature-card" role="listitem"><div class="feature-icon icon-green"  aria-hidden="true">🏆</div><h3 data-i18n="f4T">Persönliche Urkunde</h3><p data-i18n="f4P">Zertifikat nach Abschluss.</p></article>
+        <article class="feature-card" role="listitem" tabindex="0"><div class="feature-icon icon-indigo" aria-hidden="true">⚡</div><h3 data-i18n="f1T">Sofortiges Feedback</h3><p data-i18n="f1P">Nach jeder Antwort siehst du direkt ob du richtig lagst – mit Erklärung.</p></article>
+        <article class="feature-card" role="listitem" tabindex="0"><div class="feature-icon icon-teal"   aria-hidden="true">📱</div><h3 data-i18n="f2T">Lernen unterwegs</h3><p data-i18n="f2P">Optimiert für Smartphone und Tablet.</p></article>
+        <article class="feature-card" role="listitem" tabindex="0"><div class="feature-icon icon-amber"  aria-hidden="true">🎯</div><h3 data-i18n="f3T">Praxisnah</h3><p data-i18n="f3P">Echte Inhalte aus Weiterbildungskursen.</p></article>
+        <article class="feature-card" role="listitem" tabindex="0"><div class="feature-icon icon-green"  aria-hidden="true">🏆</div><h3 data-i18n="f4T">Persönliche Urkunde</h3><p data-i18n="f4P">Zertifikat nach Abschluss.</p></article>
       </div>
       <div class="stats-bar" role="region" aria-label="Statistiken">
         <div class="stat-item"><div class="stat-num">75</div><div class="stat-label" data-i18n="s1">Fragen gesamt</div></div>
@@ -134,7 +1094,7 @@ body.line-height-lg *{line-height:1.95!important;}
   </section>
 </div>
 
-<!-- ══ ABOUT PLATFORM ══ -->
+<!-- ABOUT PLATFORM -->
 
 <div class="page" id="page-about-platform">
   <section class="section"><div class="container-sm">
@@ -159,7 +1119,7 @@ body.line-height-lg *{line-height:1.95!important;}
   </div></section>
 </div>
 
-<!-- ══ TOPICS ══ -->
+<!-- TOPICS -->
 
 <div class="page" id="page-topics">
   <section class="section"><div class="container">
@@ -172,26 +1132,26 @@ body.line-height-lg *{line-height:1.95!important;}
   </div></section>
 </div>
 
-<!-- ══ QUIZ SELECT ══ -->
+<!-- QUIZ SELECT -->
 
 <div class="page" id="page-quiz-select">
   <section class="section-sm"><div class="container">
-    <button class="back-btn" id="back-to-topics" aria-label="Zurück zu Themen">← <span data-i18n="backTop">Zurück zu Themen</span></button>
+    <button class="back-btn" id="back-to-topics">← <span data-i18n="backTop">Zurück zu Themen</span></button>
     <div class="sec-header" style="text-align:left;margin-bottom:1.25rem">
       <span class="sec-label" id="module-label-select">–</span>
       <h2 class="sec-title" data-i18n="qsTitle">Quiz starten</h2>
     </div>
-    <div class="rank-ladder" id="rank-ladder" role="list" aria-label="Dein Lernfortschritt"></div>
-    <div class="level-grid"  id="level-grid"  role="list"></div>
+    <div class="rank-ladder" id="rank-ladder" role="list" aria-label="Lernfortschritt"></div>
+    <div class="level-grid" id="level-grid" role="list"></div>
   </div></section>
 </div>
 
-<!-- ══ QUIZ ══ -->
+<!-- QUIZ -->
 
 <div class="page" id="page-quiz">
   <section class="section-sm"><div class="container">
     <div class="quiz-wrap">
-      <button class="back-btn" id="back-to-select" aria-label="Quiz abbrechen">← <span data-i18n="backMod">Zurück</span></button>
+      <button class="back-btn" id="back-to-select">← <span data-i18n="backMod">Zurück</span></button>
       <div class="quiz-topbar">
         <span class="quiz-title" id="quiz-title" aria-live="polite"></span>
         <div class="quiz-pills">
@@ -202,11 +1162,11 @@ body.line-height-lg *{line-height:1.95!important;}
       <div class="prog-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Fortschritt">
         <div class="prog-fill" id="prog-fill" style="width:0%"></div>
       </div>
-      <div class="question-card">
-        <div class="q-num"  id="q-num"  aria-live="polite"></div>
-        <p   class="q-text" id="q-text" aria-live="polite"></p>
+      <div class="question-card" role="group" aria-labelledby="q-num">
+        <div class="q-num" id="q-num" aria-live="polite"></div>
+        <p class="q-text" id="q-text" aria-live="polite"></p>
       </div>
-      <div class="answers" id="answers" role="group" aria-label="Antwortmöglichkeiten"></div>
+      <div class="answers" id="answers" role="group" aria-label="Antworten"></div>
       <div class="explanation" id="explanation" role="alert" aria-live="assertive" style="display:none"></div>
       <div class="error-msg"   id="error-msg"   role="alert" style="display:none" data-i18n="errNoAnswer">Bitte wähle eine Antwort aus.</div>
       <div class="nav-btns">
@@ -216,7 +1176,7 @@ body.line-height-lg *{line-height:1.95!important;}
   </div></section>
 </div>
 
-<!-- ══ RESULT ══ -->
+<!-- RESULT -->
 
 <div class="page" id="page-result">
   <section class="section-sm"><div class="container">
@@ -224,9 +1184,7 @@ body.line-height-lg *{line-height:1.95!important;}
       <span class="result-medal" id="res-medal" role="img" aria-label="Medaille">🥇</span>
       <h2 class="result-title" id="res-title" aria-live="polite"></h2>
       <p class="result-rank-lbl" id="res-rank" aria-live="polite"></p>
-      <div class="score-ring" id="score-ring">
-        <div class="score-num" id="score-num" aria-live="polite">0<small>/15</small></div>
-      </div>
+      <div class="score-ring" id="score-ring"><div class="score-num" id="score-num" aria-live="polite">0<small>/15</small></div></div>
       <div class="rating-badge" id="rating-badge" role="status" aria-live="polite"></div>
       <div class="stats-row" role="list">
         <div class="stat-box" role="listitem"><div class="stat-v" id="s-cor">0</div><div class="stat-l" id="lbl-cor">Richtig</div></div>
@@ -252,21 +1210,21 @@ body.line-height-lg *{line-height:1.95!important;}
       </div>
       <div class="result-btns">
         <button class="btn btn-ghost"   id="btn-retry" data-i18n="btnRetry">🔄 Nochmal</button>
-        <button class="btn btn-cert"    id="btn-dl"    data-i18n="btnDL" style="display:none">📜 Urkunde herunterladen</button>
-        <button class="btn btn-primary" id="btn-ovr"   data-i18n="btnOvr">🏛️ Übersicht</button>
+        <button class="btn btn-cert"    id="btn-dl" style="display:none" data-i18n="btnDL">📜 Urkunde herunterladen</button>
+        <button class="btn btn-primary" id="btn-ovr" data-i18n="btnOvr">🏛️ Übersicht</button>
       </div>
     </div>
   </div></section>
 </div>
 
-<!-- ══ CERTIFICATE ══ -->
+<!-- CERTIFICATE -->
 
 <div class="page" id="page-certificate">
   <section class="section"><div class="container-sm">
     <div class="sec-header">
       <span class="sec-label" data-i18n="certLabel">Abschluss</span>
       <h2 class="sec-title" data-i18n="certTitle">Dein Zertifikat</h2>
-      <p class="sec-sub" data-i18n="certSub">Zertifikate abgestuft nach deiner Leistung.</p>
+      <p class="sec-sub" data-i18n="certSub">Abgestuft nach deiner Leistung.</p>
     </div>
     <div class="cert-tiers" role="list">
       <article class="cert-tier-card" role="listitem"><div class="ct-medal">📜</div><h3 data-i18n="ct0T">Teilnahme</h3><p data-i18n="ct0P">Unter 50%</p></article>
@@ -282,7 +1240,7 @@ body.line-height-lg *{line-height:1.95!important;}
   </div></section>
 </div>
 
-<!-- ══ ABOUT ME ══ -->
+<!-- ABOUT ME -->
 
 <div class="page" id="page-about-me">
   <section class="section"><div class="container-sm">
@@ -292,7 +1250,7 @@ body.line-height-lg *{line-height:1.95!important;}
     </div>
     <div class="am-grid">
       <div class="am-av-wrap">
-        <div class="am-av" role="img" aria-label="Porträt Sara Manoochehri">👩‍💼</div>
+        <div class="am-av" role="img" aria-label="Sara Manoochehri">👩‍💼</div>
         <div class="am-tags">
           <span class="tag">🇩🇪 Deutschland</span>
           <span class="tag">🇮🇷 Iran</span>
@@ -308,7 +1266,7 @@ body.line-height-lg *{line-height:1.95!important;}
   </div></section>
 </div>
 
-<!-- ══ DASHBOARD ══ -->
+<!-- DASHBOARD -->
 
 <div class="page" id="page-dashboard">
   <section class="section-sm"><div class="container">
@@ -343,7 +1301,7 @@ body.line-height-lg *{line-height:1.95!important;}
   </div></section>
 </div>
 
-<!-- ══ LEGAL ══ -->
+<!-- LEGAL -->
 
 <div class="page" id="page-legal">
   <section class="section"><div class="container-sm">
@@ -356,9 +1314,22 @@ body.line-height-lg *{line-height:1.95!important;}
       <button class="legal-tab"        id="ltab-dsde" role="tab" aria-selected="false" data-i18n="tabDSde">Datenschutz (DE)</button>
       <button class="legal-tab"        id="ltab-dses" role="tab" aria-selected="false" data-i18n="tabDSes">Privacidad (ES)</button>
     </div>
-    <div id="legal-imp"  class="legal-content" role="tabpanel"><h3>Impressum</h3><p>Sara Manoochehri · Teneriffa, Spanien<br><a href="mailto:info@upskill-academy.com">info@upskill-academy.com</a></p><h3>Haftungsausschluss</h3><p>Diese Plattform dient ausschließlich zu Bildungszwecken.</p></div>
-    <div id="legal-dsde" class="legal-content" role="tabpanel" style="display:none"><h3>Datenschutzerklärung</h3><p><strong>Verantwortliche:</strong> Sara Manoochehri, Teneriffa, Spanien.</p><h3>Datenverarbeitung</h3><p>Lernfortschritt wird lokal im Browser (localStorage) gespeichert.</p><h3>Cookies &amp; Tracking</h3><ul><li>Keine Marketing-Cookies</li><li>Kein Drittanbieter-Tracking</li></ul><h3>Deine Rechte</h3><p><a href="mailto:info@upskill-academy.com">info@upskill-academy.com</a></p></div>
-    <div id="legal-dses" class="legal-content" role="tabpanel" style="display:none"><h3>Política de Privacidad</h3><p><strong>Responsable:</strong> Sara Manoochehri, Tenerife, España.</p><h3>Tratamiento de datos</h3><p>El progreso se guarda localmente (localStorage).</p><h3>Cookies y seguimiento</h3><ul><li>Sin cookies de marketing</li><li>Sin seguimiento de terceros</li></ul><h3>Tus derechos</h3><p><a href="mailto:info@upskill-academy.com">info@upskill-academy.com</a></p></div>
+    <div id="legal-imp" class="legal-content" role="tabpanel">
+      <h3>Impressum</h3><p>Sara Manoochehri · Teneriffa, Spanien<br><a href="mailto:info@upskill-academy.com">info@upskill-academy.com</a></p>
+      <h3>Haftungsausschluss</h3><p>Diese Plattform dient ausschließlich zu Bildungszwecken.</p>
+    </div>
+    <div id="legal-dsde" class="legal-content" role="tabpanel" style="display:none">
+      <h3>Datenschutzerklärung</h3><p><strong>Verantwortliche:</strong> Sara Manoochehri, Teneriffa, Spanien.</p>
+      <h3>Datenverarbeitung</h3><p>Lernfortschritt wird lokal im Browser und bei Registrierung in Ihrem Konto gespeichert.</p>
+      <h3>Cookies &amp; Tracking</h3><ul><li>Keine Marketing-Cookies</li><li>Kein Drittanbieter-Tracking</li></ul>
+      <h3>Deine Rechte</h3><p><a href="mailto:info@upskill-academy.com">info@upskill-academy.com</a></p>
+    </div>
+    <div id="legal-dses" class="legal-content" role="tabpanel" style="display:none">
+      <h3>Política de Privacidad</h3><p><strong>Responsable:</strong> Sara Manoochehri, Tenerife, España.</p>
+      <h3>Tratamiento de datos</h3><p>El progreso se guarda localmente y en tu cuenta al registrarte.</p>
+      <h3>Cookies y seguimiento</h3><ul><li>Sin cookies de marketing</li><li>Sin seguimiento de terceros</li></ul>
+      <h3>Tus derechos</h3><p><a href="mailto:info@upskill-academy.com">info@upskill-academy.com</a></p>
+    </div>
   </div></section>
 </div>
 
@@ -427,7 +1398,7 @@ body.line-height-lg *{line-height:1.95!important;}
     <form id="form-register" class="modal-form" novalidate style="display:none">
       <div class="form-group"><label for="rg-name"  data-i18n="lName">Name</label><input type="text" id="rg-name" autocomplete="name" placeholder="Sara Manoochehri" required/></div>
       <div class="form-group"><label for="rg-email" data-i18n="lEmail">E-Mail</label><input type="email" id="rg-email" autocomplete="email" placeholder="name@example.com" required/></div>
-      <div class="form-group"><label for="rg-pw"    data-i18n="lPW">Passwort</label><input type="password" id="rg-pw" autocomplete="new-password" placeholder="Min. 8 Zeichen" required minlength="8" aria-describedby="pw-hint"/><span class="form-note" id="pw-hint" data-i18n="pwNote">Mindestens 8 Zeichen.</span></div>
+      <div class="form-group"><label for="rg-pw" data-i18n="lPW">Passwort</label><input type="password" id="rg-pw" autocomplete="new-password" placeholder="Min. 8 Zeichen" required minlength="8"/><span class="form-note" data-i18n="pwNote">Mindestens 8 Zeichen.</span></div>
       <button type="submit" class="btn btn-primary" style="width:100%" data-i18n="doReg">Konto erstellen</button>
       <p class="form-note" style="text-align:center" data-i18n="regTerms">Mit der Registrierung stimmst du unserer Datenschutzerklärung zu.</p>
     </form>
@@ -436,895 +1407,151 @@ body.line-height-lg *{line-height:1.95!important;}
 
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<!-- ══════════════════════════════════════════
-     JAVASCRIPT – vollständig inline
-══════════════════════════════════════════ -->
-
 <script>
 /* ============================================================
-   TRANSLATIONS
+   TRANSLATIONS – DE / EN / ES
    ============================================================ */
 const TR = {
   de:{
-    navHome:'Home',navWhat:'Was ist UA',navTopics:'Themen',navCert:'Zertifikat',navAbout:'Über mich',navLogin:'Anmelden',langLabel:'Sprache',
-    heroBadge:'Interaktives Lernen',heroTitle:'Academy',heroDesc:'Interaktive Lernplattform für HR, Gehaltsabrechnung und mehr – auch am Smartphone.',heroQuiz:'🚀 Zum Quiz',heroMore:'Mehr erfahren',
-    featLabel:'Warum Upskill Academy?',featTitle:'Lernen, das wirklich funktioniert',featSub:'Entwickelt für Kursteilnehmer.',
-    f1T:'Sofortiges Feedback',f1P:'Nach jeder Antwort weißt du ob du richtig lagst.',f2T:'Lernen unterwegs',f2P:'Optimiert für Smartphone und Tablet.',f3T:'Praxisnah',f3P:'Echte Inhalte aus Weiterbildungskursen.',f4T:'Persönliche Urkunde',f4P:'Zertifikat nach Abschluss.',
+    navHome:'Home',navWhat:'Was ist UA',navTopics:'Themen',navCert:'Zertifikat',
+    navAbout:'Über mich',navLogin:'Anmelden',langLabel:'Sprache',
+    heroBadge:'Interaktives Lernen',heroTitle:'Academy',
+    heroDesc:'Interaktive Lernplattform für HR, Gehaltsabrechnung und mehr – auch am Smartphone.',
+    heroQuiz:'🚀 Zum Quiz',heroMore:'Mehr erfahren',
+    featLabel:'Warum Upskill Academy?',featTitle:'Lernen, das wirklich funktioniert',
+    featSub:'Entwickelt für Kursteilnehmer in Weiterbildungsprogrammen.',
+    f1T:'Sofortiges Feedback',f1P:'Nach jeder Antwort siehst du direkt ob du richtig lagst.',
+    f2T:'Lernen unterwegs',f2P:'Optimiert für Smartphone und Tablet.',
+    f3T:'Praxisnah',f3P:'Echte Inhalte aus Weiterbildungskursen.',
+    f4T:'Persönliche Urkunde',f4P:'Zertifikat nach Abschluss.',
     s1:'Fragen gesamt',s2:'Sprachen',s3:'Module',s4:'Gratis starten',
-    apLabel:'Die Plattform',apTitle:'Was ist Upskill Academy?',apSub:'Interaktive Lernapp für Weiterbildungskurse.',
-    st1T:'Quiz-basiertes Lernen',st1P:'Lerne durch gezielte Fragen und Antworten.',st2T:'Sofortiges Feedback',st2P:'Verstehe warum eine Antwort richtig oder falsch ist.',st3T:'Stufensystem',st3P:'Von Grundlagen bis Expertenlevel.',st4T:'Drei Sprachen',st4P:'DE, EN und ES.',st5T:'Barrierefreies Lernen',st5P:'Screenreader, Tastatur, Dunkel-Modus für alle.',
-    advTitle:'Deine Vorteile',av1T:'Interaktiv',av1P:'Aktives Lernen.',av2T:'Praxisnah',av2P:'Echte Kursinhalte.',av3T:'Sofortig',av3P:'Zur Prüfungsvorbereitung.',
-    topLabel:'Lernbereiche',topTitle:'Wähle dein Thema',topSub:'5 Module mit je 15 Fragen – perfekt zur Prüfungsvorbereitung.',
-    backTop:'Zurück zu Themen',qsTitle:'Quiz starten',backMod:'Zurück',qPill:'Frage',errNoAnswer:'Bitte wähle eine Antwort aus.',
-    certLabel:'Abschluss',certTitle:'Dein Zertifikat',certSub:'Zertifikate abgestuft nach deiner Leistung.',ct0T:'Teilnahme',ct0P:'Unter 50%',ct1T:'Bestanden',ct1P:'50–74%',ct2T:'Mit Auszeichnung',ct2P:'75–99%',ct3T:'Höchstauszeichnung',ct3P:'100% – Perfekt!',
-    premH:'Premium Download',premP:'Teilen ist kostenlos. PDF-Download nach Registrierung.',premBtn:'Jetzt registrieren',
-    amLabel:'Gründerin',amBio:'Gebürtige Iranerin, aufgewachsen in Deutschland, lebt heute auf Teneriffa.',amQuote:'„Ich habe einen HR-Kurs auf Spanisch gemacht. Wie cool wäre es, das am Handy zu lernen und direkt abgefragt zu werden. Und hier sind wir."',amMiss:'Upskill Academy macht Lernen einfacher – langfristig für Kurscenter wie CEP Norte.',
-    shareT:'🎉 Ergebnis teilen',shareCopy:'📋 Kopieren',certHint:'🔒 Registriere dich, um deine Urkunde herunterzuladen.',certRegBtn:'Jetzt registrieren',lblCertName:'📝 Dein Name:',namePH:'Vollständiger Name...',
+    apLabel:'Die Plattform',apTitle:'Was ist Upskill Academy?',
+    apSub:'Interaktive Lernapp für Weiterbildungskurse.',
+    st1T:'Quiz-basiertes Lernen',st1P:'Lerne durch gezielte Fragen und Antworten.',
+    st2T:'Sofortiges Feedback',st2P:'Verstehe warum eine Antwort richtig oder falsch ist.',
+    st3T:'Stufensystem',st3P:'Von Grundlagen bis Expertenlevel.',
+    st4T:'Drei Sprachen',st4P:'DE, EN und ES.',
+    st5T:'Barrierefreies Lernen',st5P:'Screenreader, Tastatur, Dunkel-Modus für alle.',
+    advTitle:'Deine Vorteile',
+    av1T:'Interaktiv',av1P:'Aktives Lernen.',
+    av2T:'Praxisnah',av2P:'Echte Kursinhalte.',
+    av3T:'Sofortig',av3P:'Zur Prüfungsvorbereitung.',
+    topLabel:'Lernbereiche',topTitle:'Wähle dein Thema',
+    topSub:'5 Module mit je 15 Fragen – perfekt zur Prüfungsvorbereitung.',
+    backTop:'Zurück zu Themen',qsTitle:'Quiz starten',backMod:'Zurück',qPill:'Frage',
+    errNoAnswer:'Bitte wähle eine Antwort aus.',
+    certLabel:'Abschluss',certTitle:'Dein Zertifikat',certSub:'Abgestuft nach deiner Leistung.',
+    ct0T:'Teilnahme',ct0P:'Unter 50%',ct1T:'Bestanden',ct1P:'50–74%',
+    ct2T:'Mit Auszeichnung',ct2P:'75–99%',ct3T:'Höchstauszeichnung',ct3P:'100%',
+    premH:'Premium Download',premP:'Teilen kostenlos. PDF nach Registrierung.',premBtn:'Jetzt registrieren',
+    amLabel:'Gründerin',
+    amBio:'Gebürtige Iranerin, aufgewachsen in Deutschland, lebt heute auf Teneriffa.',
+    amQuote:'„Ich habe einen HR-Kurs auf Spanisch gemacht. Wie cool wäre es, das am Handy zu lernen und direkt abgefragt zu werden. Und hier sind wir."',
+    amMiss:'Upskill Academy macht Lernen einfacher – langfristig für Kurscenter wie CEP Norte.',
+    shareT:'🎉 Ergebnis teilen',shareCopy:'📋 Kopieren',
+    certHint:'🔒 Registriere dich, um deine Urkunde herunterzuladen.',
+    certRegBtn:'Jetzt registrieren',lblCertName:'📝 Dein Name:',namePH:'Vollständiger Name...',
     btnRetry:'🔄 Nochmal',btnDL:'📜 Urkunde herunterladen',btnOvr:'🏛️ Übersicht',
-    dashLabel:'Mein Bereich',dashTitle:'Mein Lernfortschritt',dashQ:'Quizzes',dashC:'Urkunden',dashMyCerts:'Meine Urkunden',noCerts:'Noch keine Urkunden.',dashAchiev:'Errungenschaften',dashProg:'Lernfortschritt',btnLogout:'Abmelden',
-    legalLabel:'Rechtliches',legalTitle:'AGB & Datenschutz',tabImp:'Impressum',tabDSde:'Datenschutz (DE)',tabDSes:'Privacidad (ES)',
-    footDesc:'Interaktives Lernen für HR & Administration.',footNav:'Navigation',footLegal:'Rechtliches',footRights:'Alle Rechte vorbehalten',
-    authSub:'Fortschritt speichern & Urkunden herunterladen',tabLogin:'Anmelden',tabReg:'Registrieren',lEmail:'E-Mail',lPW:'Passwort',lName:'Name',pwNote:'Mindestens 8 Zeichen.',doLogin:'Anmelden',doReg:'Konto erstellen',orWith:'oder',regTerms:'Mit der Registrierung stimmst du unserer Datenschutzerklärung zu.',
-    qLabel:'FRAGE',qOf:'von',qNext:'Weiter →',qRight:'✅ Richtig!',qWrong:'❌ Falsch.',lCorr:'Richtig',lWrong:'Falsch',lPct:'Quote',
+    dashLabel:'Mein Bereich',dashTitle:'Mein Lernfortschritt',
+    dashQ:'Quizzes',dashC:'Urkunden',dashMyCerts:'Meine Urkunden',
+    noCerts:'Noch keine Urkunden.',dashAchiev:'Errungenschaften',dashProg:'Lernfortschritt',
+    btnLogout:'Abmelden',
+    legalLabel:'Rechtliches',legalTitle:'AGB & Datenschutz',
+    tabImp:'Impressum',tabDSde:'Datenschutz (DE)',tabDSes:'Privacidad (ES)',
+    footDesc:'Interaktives Lernen für HR & Administration.',
+    footNav:'Navigation',footLegal:'Rechtliches',footRights:'Alle Rechte vorbehalten',
+    authSub:'Fortschritt speichern & Urkunden herunterladen',
+    tabLogin:'Anmelden',tabReg:'Registrieren',lEmail:'E-Mail',lPW:'Passwort',lName:'Name',
+    pwNote:'Mindestens 8 Zeichen.',doLogin:'Anmelden',doReg:'Konto erstellen',
+    orWith:'oder',regTerms:'Mit der Registrierung stimmst du unserer Datenschutzerklärung zu.',
+    qLabel:'FRAGE',qOf:'von',qNext:'Weiter →',
+    qRight:'✅ Richtig!',qWrong:'❌ Falsch.',
+    lCorr:'Richtig',lWrong:'Falsch',lPct:'Quote',
     ranks:['Praktikant','HR-Assistent','Sachbearbeiter','HR-Specialist','HR-Analyst','HR Business Partner','HR-Manager'],
     rankUp:'🎉 Rang-Aufstieg! Du bist jetzt:',rankNow:'Du bist jetzt:',
     resultT:['Versuch es nochmal 💪','Bestanden! 👍','Sehr gut! 👏','Hervorragend! 🎉'],
     ratings:['🌱 Anfänger (0–7)','📈 Fortgeschritten (8–11)','🏆 Profi (12–15)'],
-    certTiers:[{min:0,max:49,title:'Teilnahmeurkunde',medal:'📜'},{min:50,max:74,title:'Urkunde – Bestanden',medal:'🥉'},{min:75,max:99,title:'Urkunde – Mit Auszeichnung',medal:'🥈'},{min:100,max:100,title:'Urkunde – Höchstauszeichnung',medal:'🏆'}],
-    certHereby:'hat erfolgreich am Quiz',certComp:'der Upskill Academy teilgenommen und',certScored:'der Fragen korrekt beantwortet.',certSign:'Ausgestellt von',certDate:'Datum',
+    certTiers:[{min:0,max:49,title:'Teilnahmeurkunde',medal:'📜'},{min:50,max:74,title:'Urkunde – Bestanden',medal:'🥉'},{min:75,max:99,title:'Mit Auszeichnung',medal:'🥈'},{min:100,max:100,title:'Höchstauszeichnung',medal:'🏆'}],
+    certHereby:'hat am Quiz',certComp:'der Upskill Academy teilgenommen und',
+    certScored:'der Fragen korrekt beantwortet.',certSign:'Ausgestellt von',certDate:'Datum',
     moduleNames:['Módulo 1 – Dirección Estratégica RRHH','Módulo 2 – Procesos de RRHH','Módulo 3 – Política Retributiva','Módulo 4 – PRL y Formación','Módulo 5 – Legislación Laboral'],
     moduleShort:['Estrategia','Procesos','Retribución','PRL & Formación','Legislación'],
     moduleDesc:['Strategische HR-Ausrichtung, Wettbewerbsvorteil, Planung & Struktur.','Rekrutierung, Onboarding, Leistungsbeurteilung & Entwicklung.','Gehaltsstrukturen, Anreize, variable Vergütung & Sozialleistungen.','Arbeitssicherheit, Prävention & Ausbildungsplanung.','Arbeitsrecht, Tarifverträge, Kündigungsschutz & Sozialversicherung.'],
     moduleEmoji:['🧭','⚙️','💰','🦺','⚖️'],
-    soon:'Demnächst',qInfo:'15 Fragen',bestMed:'Beste Medaille:',
     noName:'✏️ Bitte gib deinen Namen ein!',dlOk:'📜 Urkunde heruntergeladen!',
-    lockedMsg:'🔒 Schließe zuerst das vorherige Level ab!'
-  },
-  en:{
-    navHome:'Home',navWhat:'About UA',navTopics:'Topics',navCert:'Certificate',navAbout:'About me',navLogin:'Sign in',langLabel:'Language',
-    heroBadge:'Interactive Learning',heroTitle:'Academy',heroDesc:'Interactive learning platform for HR, payroll and more – on your smartphone.',heroQuiz:'🚀 Go to Quiz',heroMore:'Learn more',
-    featLabel:'Why Upskill Academy?',featTitle:'Learning that actually works',featSub:'Built for continuing education students.',
-    f1T:'Instant Feedback',f1P:'After every answer you know immediately.',f2T:'Learn on the go',f2P:'Optimised for smartphone and tablet.',f3T:'Practical',f3P:'Real content from training courses.',f4T:'Personal Certificate',f4P:'Certificate after completion.',
-    s1:'Questions total',s2:'Languages',s3:'Modules',s4:'Free to start',
-    apLabel:'The Platform',apTitle:'What is Upskill Academy?',apSub:'Interactive learning app for continuing education.',
-    st1T:'Quiz-based learning',st1P:'Learn through targeted Q&A.',st2T:'Instant feedback',st2P:'Understand why an answer is right or wrong.',st3T:'Level system',st3P:'From basics to expert.',st4T:'Three languages',st4P:'DE, EN and ES.',st5T:'Accessible learning',st5P:'Screen reader, keyboard, dark mode for everyone.',
-    advTitle:'Your benefits',av1T:'Interactive',av1P:'Active learning.',av2T:'Practical',av2P:'Real course content.',av3T:'Instant',av3P:'Perfect for exam prep.',
-    topLabel:'Learning areas',topTitle:'Choose your topic',topSub:'5 modules with 15 questions each.',
-    backTop:'Back to topics',qsTitle:'Start Quiz',backMod:'Back',qPill:'Question',errNoAnswer:'Please select an answer.',
-    certLabel:'Completion',certTitle:'Your Certificate',certSub:'Certificates graded by performance.',ct0T:'Participation',ct0P:'Under 50%',ct1T:'Passed',ct1P:'50–74%',ct2T:'With Distinction',ct2P:'75–99%',ct3T:'Highest Distinction',ct3P:'100% – Perfect!',
-    premH:'Premium Download',premP:'Sharing is free. PDF download after registration.',premBtn:'Register now',
-    amLabel:'Founder',amBio:'Born in Iran, raised in Germany, living in Tenerife.',amQuote:'"I did an HR course in Spanish. How cool would it be to learn on my phone and get quizzed. And here we are."',amMiss:'Upskill Academy makes learning simpler – long-term for course centres like CEP Norte.',
-    shareT:'🎉 Share your result',shareCopy:'📋 Copy',certHint:'🔒 Register to download your certificate.',certRegBtn:'Register now',lblCertName:'📝 Your name:',namePH:'Full name...',
-    btnRetry:'🔄 Try again',btnDL:'📜 Download Certificate',btnOvr:'🏛️ Overview',
-    dashLabel:'My area',dashTitle:'My Learning Progress',dashQ:'Quizzes',dashC:'Certs',dashMyCerts:'My Certificates',noCerts:'No certificates yet.',dashAchiev:'Achievements',dashProg:'Progress',btnLogout:'Sign out',
-    legalLabel:'Legal',legalTitle:'Terms & Privacy',tabImp:'Legal Notice',tabDSde:'Privacy (DE)',tabDSes:'Privacidad (ES)',
-    footDesc:'Interactive learning for HR & Administration.',footNav:'Navigation',footLegal:'Legal',footRights:'All rights reserved',
-    authSub:'Save progress & download certificates',tabLogin:'Sign in',tabReg:'Register',lEmail:'Email',lPW:'Password',lName:'Name',pwNote:'At least 8 characters.',doLogin:'Sign in',doReg:'Create account',orWith:'or',regTerms:'By registering you agree to our privacy policy.',
-    qLabel:'QUESTION',qOf:'of',qNext:'Next →',qRight:'✅ Correct!',qWrong:'❌ Wrong.',lCorr:'Correct',lWrong:'Wrong',lPct:'Score',
-    ranks:['Intern','HR Assistant','Administrator','HR Specialist','HR Analyst','HR Business Partner','HR Manager'],
-    rankUp:'🎉 Rank up! You are now:',rankNow:'You are now:',
-    resultT:['Try again 💪','Passed! 👍','Well done! 👏','Outstanding! 🎉'],
-    ratings:['🌱 Beginner (0–7)','📈 Intermediate (8–11)','🏆 Pro (12–15)'],
-    certTiers:[{min:0,max:49,title:'Certificate of Participation',medal:'📜'},{min:50,max:74,title:'Certificate – Passed',medal:'🥉'},{min:75,max:99,title:'Certificate – With Distinction',medal:'🥈'},{min:100,max:100,title:'Certificate – Highest Distinction',medal:'🏆'}],
-    certHereby:'has successfully participated in the quiz',certComp:'of Upskill Academy and answered',certScored:'questions correctly.',certSign:'Issued by',certDate:'Date',
-    moduleNames:['Module 1 – Strategic HR','Module 2 – HR Processes','Module 3 – Compensation','Module 4 – OHS & Training','Module 5 – Labour Law'],
-    moduleShort:['Strategy','Processes','Compensation','OHS & Training','Labour Law'],
-    moduleDesc:['Strategic HR alignment, competitive advantage, planning & structure.','Recruitment, onboarding, performance management & development.','Salary structures, incentives, variable pay & benefits.','Occupational health, prevention & training planning.','Labour law, collective agreements, dismissal & social insurance.'],
-    moduleEmoji:['🧭','⚙️','💰','🦺','⚖️'],
-    soon:'Coming soon',qInfo:'15 questions',bestMed:'Best medal:',
-    noName:'✏️ Please enter your name!',dlOk:'📜 Certificate downloaded!',
-    lockedMsg:'🔒 Complete the previous level first!'
-  },
-  es:{
-    navHome:'Inicio',navWhat:'Qué es UA',navTopics:'Temas',navCert:'Certificado',navAbout:'Sobre mí',navLogin:'Acceder',langLabel:'Idioma',
-    heroBadge:'Aprendizaje interactivo',heroTitle:'Academy',heroDesc:'Plataforma de aprendizaje interactiva para RRHH, nóminas y más – en tu smartphone.',heroQuiz:'🚀 Al Quiz',heroMore:'Saber más',
-    featLabel:'¿Por qué Upskill Academy?',featTitle:'Aprendizaje que funciona de verdad',featSub:'Para estudiantes de formación continua.',
-    f1T:'Feedback inmediato',f1P:'Tras cada respuesta sabes si acertaste.',f2T:'Aprende en movimiento',f2P:'Optimizado para smartphone y tablet.',f3T:'Práctico',f3P:'Contenido real de cursos.',f4T:'Certificado personal',f4P:'Certificado al completar.',
-    s1:'Preguntas totales',s2:'Idiomas',s3:'Módulos',s4:'Empieza gratis',
-    apLabel:'La plataforma',apTitle:'¿Qué es Upskill Academy?',apSub:'App de aprendizaje interactiva.',
-    st1T:'Aprendizaje por quiz',st1P:'Aprende con preguntas y respuestas.',st2T:'Feedback inmediato',st2P:'Entiende por qué una respuesta es correcta.',st3T:'Sistema de niveles',st3P:'De principiante a experto.',st4T:'Tres idiomas',st4P:'DE, EN y ES.',st5T:'Aprendizaje accesible',st5P:'Lector de pantalla, teclado, modo oscuro para todos.',
-    advTitle:'Tus ventajas',av1T:'Interactivo',av1P:'Aprendizaje activo.',av2T:'Práctico',av2P:'Contenido real.',av3T:'Inmediato',av3P:'Para preparar exámenes.',
-    topLabel:'Áreas de aprendizaje',topTitle:'Elige tu tema',topSub:'5 módulos con 15 preguntas cada uno.',
-    backTop:'Volver a temas',qsTitle:'Empezar Quiz',backMod:'Volver',qPill:'Pregunta',errNoAnswer:'Por favor, selecciona una respuesta.',
-    certLabel:'Finalización',certTitle:'Tu Certificado',certSub:'Certificados según rendimiento.',ct0T:'Participación',ct0P:'Menos del 50%',ct1T:'Aprobado',ct1P:'50–74%',ct2T:'Con distinción',ct2P:'75–99%',ct3T:'Máxima distinción',ct3P:'100% – ¡Perfecto!',
-    premH:'Descarga Premium',premP:'Compartir es gratis. PDF tras registro.',premBtn:'Regístrate',
-    amLabel:'Fundadora',amBio:'De origen iraní, criada en Alemania, vive en Tenerife.',amQuote:'"Hice un curso de RRHH en español. ¡Qué genial sería aprender en el móvil y que me preguntaran! Y aquí estamos."',amMiss:'Upskill Academy hace el aprendizaje más sencillo – a largo plazo para centros como CEP Norte.',
-    shareT:'🎉 Compartir resultado',shareCopy:'📋 Copiar',certHint:'🔒 Regístrate para descargar tu diploma.',certRegBtn:'Registrarse',lblCertName:'📝 Tu nombre:',namePH:'Nombre completo...',
-    btnRetry:'🔄 Reintentar',btnDL:'📜 Descargar Diploma',btnOvr:'🏛️ Inicio',
-    dashLabel:'Mi área',dashTitle:'Mi progreso',dashQ:'Quizzes',dashC:'Diplomas',dashMyCerts:'Mis Diplomas',noCerts:'Sin diplomas aún.',dashAchiev:'Logros',dashProg:'Progreso',btnLogout:'Cerrar sesión',
-    legalLabel:'Legal',legalTitle:'AGB y Privacidad',tabImp:'Aviso legal',tabDSde:'Datenschutz (DE)',tabDSes:'Privacidad (ES)',
-    footDesc:'Aprendizaje interactivo para RRHH y administración.',footNav:'Navegación',footLegal:'Legal',footRights:'Todos los derechos reservados',
-    authSub:'Guarda progreso y descarga diplomas',tabLogin:'Acceder',tabReg:'Registrarse',lEmail:'Correo',lPW:'Contraseña',lName:'Nombre',pwNote:'Mínimo 8 caracteres.',doLogin:'Acceder',doReg:'Crear cuenta',orWith:'o',regTerms:'Al registrarte aceptas nuestra política de privacidad.',
-    qLabel:'PREGUNTA',qOf:'de',qNext:'Siguiente →',qRight:'✅ ¡Correcto!',qWrong:'❌ Incorrecto.',lCorr:'Correctas',lWrong:'Incorrectas',lPct:'Porcentaje',
-    ranks:['Becario','Asistente RRHH','Administrativo','Especialista RRHH','Analista RRHH','HR Business Partner','HR Manager'],
-    rankUp:'🎉 ¡Subida de rango! Ahora eres:',rankNow:'Ahora eres:',
-    resultT:['¡Inténtalo de nuevo! 💪','¡Aprobado! 👍','¡Muy bien! 👏','¡Excelente! 🎉'],
-    ratings:['🌱 Principiante (0–7)','📈 Intermedio (8–11)','🏆 Profesional (12–15)'],
-    certTiers:[{min:0,max:49,title:'Certificado de Participación',medal:'📜'},{min:50,max:74,title:'Certificado – Aprobado',medal:'🥉'},{min:75,max:99,title:'Certificado – Con distinción',medal:'🥈'},{min:100,max:100,title:'Certificado – Máxima distinción',medal:'🏆'}],
-    certHereby:'ha participado exitosamente en el quiz',certComp:'de Upskill Academy y ha respondido',certScored:'de las preguntas correctamente.',certSign:'Emitido por',certDate:'Fecha',
-    moduleNames:['Módulo 1 – Dirección Estratégica RRHH','Módulo 2 – Procesos de RRHH','Módulo 3 – Política Retributiva','Módulo 4 – PRL y Formación','Módulo 5 – Legislación Laboral'],
-    moduleShort:['Estrategia','Procesos','Retribución','PRL & Formación','Legislación'],
-    moduleDesc:['Dirección estratégica, ventaja competitiva, planificación y estructura.','Reclutamiento, onboarding, evaluación del desempeño y desarrollo.','Estructuras salariales, incentivos, retribución variable y beneficios.','Seguridad laboral, prevención y planificación formativa.','Derecho laboral, convenios, despido y seguridad social.'],
-    moduleEmoji:['🧭','⚙️','💰','🦺','⚖️'],
-    soon:'Próximamente',qInfo:'15 preguntas',bestMed:'Mejor medalla:',
-    noName:'✏️ Introduce tu nombre.',dlOk:'📜 ¡Diploma descargado!',
-    lockedMsg:'🔒 ¡Completa primero el nivel anterior!'
-  }
-};
-
-/* ============================================================
-   QUESTION DATABASE – 5 Módulos × 15 preguntas
-   ============================================================ */
-const QDB = [
-  /* MÓDULO 0 – Dirección Estratégica RRHH */
-  [
-    {q:'¿Qué es la Dirección Estratégica de RRHH?',a:['Solo administrar nóminas','Integrar la gestión de personas en la estrategia empresarial','Contratar personal temporal','Gestionar solo ausencias'],correct:1,exp:'La Dirección Estratégica integra la gestión de personas en el núcleo de la estrategia corporativa.'},
-    {q:'¿De dónde surge la estrategia de RRHH?',a:['Del deseo del director','De la estrategia corporativa','De los requisitos legales','De las tendencias del mercado'],correct:1,exp:'Toda estrategia de RRHH parte de la estrategia corporativa.'},
-    {q:'¿Qué caracteriza la Etapa 1 (Administración de Personal)?',a:['Es proactiva','Es reactiva: solo gestiona contratos y nóminas','Planifica el talento','Usa People Analytics'],correct:1,exp:'La Etapa 1 es reactiva: gestiona contratos y nóminas sin anticiparse.'},
-    {q:'¿Qué significa ser "reactivo" en RRHH?',a:['Actuar antes del problema','Actuar solo cuando el problema ya ha ocurrido','Analizar datos para decidir','Planificar el talento'],correct:1,exp:'Reactivo significa actuar solo cuando algo falla, sin anticiparse.'},
-    {q:'¿Qué ejemplo describe RRHH en Etapa 1?',a:['People Analytics','Participar en la estrategia','Buscar sustituto cuando alguien ya se ha ido','Realizar encuestas de clima'],correct:2,exp:'En Etapa 1 RRHH solo busca sustituto cuando el empleado ya se ha marchado.'},
-    {q:'¿Qué aporta la Etapa 2 frente a la Etapa 1?',a:['Solo burocracia','Funciones especializadas: selección, formación, motivación','Integración estratégica completa','Automatización total'],correct:1,exp:'Etapa 2 incorpora funciones especializadas pero sin participación estratégica.'},
-    {q:'¿Qué caracteriza la Etapa 3?',a:['Solo gestiona nóminas','RRHH es departamento clave que participa en la dirección','Solo trabaja con sindicatos','Gestiona el marketing'],correct:1,exp:'En Etapa 3, RRHH es proactivo, analítico y participa en la toma de decisiones.'},
-    {q:'¿Qué tecnologías impulsan el RRHH estratégico?',a:['Fax e impresoras','Digitalización, teletrabajo, automatización e IA','Solo redes sociales','Solo almacenamiento en nube'],correct:1,exp:'Digitalización, teletrabajo, automatización e IA son los principales impulsores.'},
-    {q:'¿Qué es People Analytics?',a:['Software de nóminas','Análisis de datos de personas para tomar decisiones basadas en evidencia','Proceso de reclutamiento externo','Método de teambuilding'],correct:1,exp:'People Analytics aplica el análisis de datos a la gestión de personas.'},
-    {q:'¿Qué debe prever RRHH ante una expansión internacional?',a:['Solo más material de oficina','Perfiles con idiomas, competencias interculturales y políticas de movilidad','Despedir a empleados','Solo ajustar salarios'],correct:1,exp:'RRHH debe anticipar idiomas, competencias interculturales y políticas de movilidad.'},
-    {q:'¿Cuál es el objetivo de alinear RRHH con la estrategia?',a:['Reducir costes al mínimo','Asegurar que las personas impulsen la ventaja competitiva','Gestionar solo las bajas','Controlar la asistencia'],correct:1,exp:'Alinear RRHH garantiza que las personas sean fuente de ventaja competitiva.'},
-    {q:'¿Qué diferencia al HR Business Partner (HRBP) de un generalista?',a:['El HRBP solo gestiona nóminas','El HRBP actúa como consultor estratégico de una unidad de negocio','No hay diferencia','El HRBP gestiona solo selección'],correct:1,exp:'El HRBP es un especialista de RRHH que actúa como socio estratégico de una unidad de negocio.'},
-    {q:'¿Qué es la ventaja competitiva basada en personas?',a:['Pagar salarios más bajos','Personas difíciles de imitar, bien organizadas y sostenibles','Usar más tecnología','Invertir más en publicidad'],correct:1,exp:'Las personas son ventaja si son difíciles de imitar, generan valor y son sostenibles.'},
-    {q:'¿Qué es la planificación estratégica de RRHH?',a:['Reaccionar a vacantes','Anticipar las necesidades de personas para los objetivos futuros','Gestionar solo nóminas','Contratar sin criterios'],correct:1,exp:'Anticipa qué personas, con qué perfil y cuándo se necesitarán.'},
-    {q:'¿Qué KPIs son típicos en RRHH estratégico?',a:['Solo el precio de la acción','Rotación, absentismo, tiempo de cobertura, horas de formación y satisfacción','Solo ventas','Solo valoraciones de clientes'],correct:1,exp:'KPIs: rotación, absentismo, tiempo de cobertura, formación y satisfacción.'},
-  ],
-  /* MÓDULO 1 – Procesos de RRHH */
-  [
-    {q:'¿Cuál es el primer paso en un proceso de selección?',a:['Publicar la oferta','Definir el perfil del puesto','Realizar entrevistas','Firmar el contrato'],correct:1,exp:'Antes de publicar hay que definir el perfil: competencias, formación y experiencia.'},
-    {q:'¿Qué es el onboarding?',a:['El proceso de despido','El proceso de integración del nuevo empleado','La evaluación anual','Una encuesta de clima'],correct:1,exp:'El onboarding facilita la incorporación y adaptación del nuevo empleado.'},
-    {q:'¿Qué es una entrevista por competencias?',a:['Una entrevista informal','Evalúa comportamientos pasados para predecir el rendimiento futuro','Una prueba escrita','Una visita a las instalaciones'],correct:1,exp:'Usa ejemplos reales del pasado para predecir el comportamiento futuro.'},
-    {q:'¿Qué es el reclutamiento interno?',a:['Contratar a familiares','Cubrir vacantes con personas ya presentes en la organización','Publicar en portales externos','Contratar a través de ETTs'],correct:1,exp:'El reclutamiento interno aprovecha el talento existente para cubrir vacantes.'},
-    {q:'¿Qué es el assessment center?',a:['Un centro de formación','Método con múltiples pruebas para valorar candidatos de forma integral','Una oficina de empleo','Un test de personalidad único'],correct:1,exp:'Usa dinámicas, role plays y pruebas para evaluar competencias integralmente.'},
-    {q:'¿Qué es la gestión del desempeño?',a:['Controlar la asistencia','Proceso continuo de fijación de objetivos, seguimiento y evaluación del rendimiento','Solo calcular el bonus','Revisar contratos'],correct:1,exp:'Ciclo continuo: fijar objetivos, dar feedback y evaluar resultados.'},
-    {q:'¿Qué es el feedback 360 grados?',a:['Evaluación solo del superior','Evaluación por superiores, compañeros, subordinados y autoevaluación','Un test de personalidad','Una encuesta de clientes'],correct:1,exp:'Recoge opiniones de todo el entorno laboral del evaluado.'},
-    {q:'¿Cuál es la diferencia entre formación y desarrollo?',a:['Son lo mismo','Formación cubre necesidades actuales; desarrollo prepara para el futuro','El desarrollo es solo para directivos','La formación es solo técnica'],correct:1,exp:'La formación resuelve necesidades inmediatas; el desarrollo prepara para el futuro.'},
-    {q:'¿Qué es la detección de necesidades formativas (DNF)?',a:['Preguntar qué cursos prefieren','Proceso para identificar la brecha entre competencias actuales y requeridas','Revisar el catálogo de cursos','Calcular el presupuesto'],correct:1,exp:'Identifica la brecha entre competencias actuales y necesarias.'},
-    {q:'¿Qué es el plan de carrera?',a:['El currículum del empleado','Hoja de ruta del desarrollo profesional dentro de la empresa','El contrato indefinido','El plan de jubilación'],correct:1,exp:'Define la progresión profesional y las acciones de desarrollo necesarias.'},
-    {q:'¿Qué es el mentoring?',a:['Un tipo de contrato','Relación en que un profesional experimentado guía el desarrollo de otro','Un programa de descuentos','Una evaluación anual'],correct:1,exp:'El mentor apoya el desarrollo profesional del mentee con su experiencia.'},
-    {q:'¿Qué es el absentismo laboral?',a:['Las vacaciones','Ausencias no planificadas medidas como % de horas perdidas','Las bajas de maternidad','Los días festivos'],correct:1,exp:'Son las ausencias no planificadas; se mide como % de horas perdidas sobre las previstas.'},
-    {q:'¿Cómo se calcula la tasa de rotación?',a:['Bajas / empleados totales','(Número de bajas / Plantilla media) × 100','Días de baja × salario','Total de bajas del año'],correct:1,exp:'Rotación = (Nº de bajas / Plantilla media) × 100.'},
-    {q:'¿Qué es la entrevista de salida?',a:['La entrevista final de selección','Conversación al terminar la relación laboral para conocer causas y mejorar la retención','La evaluación del último año','El trámite de baja en SS'],correct:1,exp:'Recoge información clave para mejorar la retención y el clima organizacional.'},
-    {q:'¿Qué es el employer branding?',a:['Publicidad de productos','La imagen de la empresa como empleador para atraer y retener talento','La marca del CEO','El logotipo corporativo'],correct:1,exp:'Construye la reputación de la empresa como empleador deseable.'},
-  ],
-  /* MÓDULO 2 – Política Retributiva */
-  [
-    {q:'¿Qué es la política retributiva?',a:['Solo el salario base','Conjunto de decisiones para remunerar de forma justa y competitiva','El convenio colectivo','Solo los beneficios sociales'],correct:1,exp:'Define criterios de remuneración: fijo, variable, beneficios y equidad.'},
-    {q:'¿Qué diferencia salario bruto de salario neto?',a:['Son iguales','Bruto es el total; neto es lo que cobra el empleado tras retenciones','El neto es mayor','El bruto es solo la base'],correct:1,exp:'Bruto es el total pactado; neto es lo que se percibe tras retenciones.'},
-    {q:'¿Qué es el Salario Mínimo Interprofesional (SMI)?',a:['El salario promedio del sector','La retribución mínima legal que todo trabajador tiene derecho a percibir','El salario de directivos','El salario del convenio'],correct:1,exp:'El SMI es la retribución mínima legal establecida por el gobierno.'},
-    {q:'¿Qué es la retribución variable?',a:['El salario fijo mensual','Parte ligada al rendimiento, resultados u objetivos alcanzados','Los beneficios sociales','Las horas extra'],correct:1,exp:'Premia resultados: comisiones, bonus, participación en beneficios, etc.'},
-    {q:'¿Qué son los beneficios sociales?',a:['El salario fijo','Compensaciones adicionales no salariales: seguro médico, pensión, coche…','Las horas extra','Los incentivos por ventas'],correct:1,exp:'Complementan el salario con elementos como seguro médico o plan de pensiones.'},
-    {q:'¿Qué es la banda salarial?',a:['El salario del convenio','Rango de retribución: mínimo, punto medio y máximo','El complemento de antigüedad','El salario neto'],correct:1,exp:'Define el rango retributivo de un puesto con mínimo, punto medio y máximo.'},
-    {q:'¿Qué es la equidad interna?',a:['Que todos cobren igual','Percepción de justicia al comparar retribuciones dentro de la empresa','Que nadie sepa los salarios','Solo cumplir el convenio'],correct:1,exp:'Garantiza que las diferencias salariales sean justas y coherentes internamente.'},
-    {q:'¿Qué es la competitividad externa?',a:['Pagar menos que la competencia','Posicionamiento del salario respecto al mercado para atraer talento','Más vacaciones','Solo mejorar los bonus'],correct:1,exp:'Compara nuestros salarios con el mercado laboral para ser atractivos.'},
-    {q:'¿Para qué sirve una encuesta salarial?',a:['Para medir satisfacción','Obtener datos del mercado y ajustar la política salarial','Para calcular nóminas','Para negociar el convenio'],correct:1,exp:'Aporta datos del mercado para ajustar la política retributiva.'},
-    {q:'¿Qué es la retribución flexible?',a:['Cambiar el salario cada mes','Sistema que permite destinar parte del bruto a productos con ventaja fiscal','Trabajo a tiempo parcial','Cobrar en especie'],correct:1,exp:'Permite al empleado destinar parte del bruto a productos con ventaja fiscal.'},
-    {q:'¿Qué es el salario emocional?',a:['Un bonus emocional','Beneficios no económicos que mejoran la satisfacción laboral','El plan de pensiones','Solo el teletrabajo'],correct:1,exp:'Incluye flexibilidad, conciliación, reconocimiento y factores de bienestar.'},
-    {q:'¿Qué es la valoración de puestos?',a:['Evaluar el rendimiento','Proceso para determinar la importancia relativa de cada puesto','Calcular el bonus','Revisar contratos'],correct:1,exp:'Determina el peso relativo de cada cargo para construir una estructura salarial justa.'},
-    {q:'¿Qué es la brecha salarial de género?',a:['Que las mujeres trabajan menos','Diferencia de retribución media entre hombres y mujeres en contextos comparables','El coste de maternidad','Diferencia de categorías'],correct:1,exp:'Mide la diferencia media de retribución entre hombres y mujeres.'},
-    {q:'¿Qué es el bonus anual?',a:['La paga extra obligatoria','Retribución variable ligada al cumplimiento de objetivos anuales','Vacaciones adicionales','El complemento de transporte'],correct:1,exp:'Premia el cumplimiento de objetivos individuales y/o de empresa.'},
-    {q:'¿Qué es el Total Rewards?',a:['Solo el salario bruto','Suma de salario fijo, variable, beneficios, desarrollo y bienestar','El coste total de empresa','El salario neto'],correct:1,exp:'Engloba todo el valor recibido: salario, beneficios, desarrollo y bienestar.'},
-  ],
-  /* MÓDULO 3 – PRL y Formación */
-  [
-    {q:'¿Qué significa PRL?',a:['Plan de Recursos Laborales','Prevención de Riesgos Laborales','Programa de Retribución Laboral','Plan de Relaciones Laborales'],correct:1,exp:'PRL es Prevención de Riesgos Laborales: actividades para proteger la salud en el trabajo.'},
-    {q:'¿Cuál es la ley principal de PRL en España?',a:['Estatuto de los Trabajadores','Ley 31/1995 de Prevención de Riesgos Laborales','Ley Orgánica 3/2018','Ley General de la Seguridad Social'],correct:1,exp:'La Ley 31/1995 establece el marco normativo de la prevención en España.'},
-    {q:'¿Qué es la evaluación de riesgos?',a:['La evaluación anual de desempeño','Proceso para identificar peligros, valorar riesgos y planificar medidas preventivas','La auditoría financiera','El informe médico'],correct:1,exp:'Identifica peligros y valora su probabilidad e impacto para prevenirlos.'},
-    {q:'¿Quién garantiza la seguridad en el trabajo?',a:['El trabajador','El empresario','El sindicato','La mutua'],correct:1,exp:'El empresario es el principal responsable de la seguridad y salud de los trabajadores.'},
-    {q:'¿Qué es un EPI?',a:['Un tipo de contrato','Equipo de Protección Individual contra riesgos residuales','Un software de RRHH','Un registro de accidentes'],correct:1,exp:'Los EPIs (casco, guantes…) son el último recurso de protección ante riesgos residuales.'},
-    {q:'¿Qué es el plan de prevención?',a:['El plan de formación','Documento que integra la actividad preventiva en la gestión de la empresa','El reglamento interno','El manual de calidad'],correct:1,exp:'Integra la PRL en la estructura, organización y procesos de la empresa.'},
-    {q:'¿Qué es un accidente de trabajo?',a:['Cualquier lesión personal','Lesión sufrida por el trabajador a consecuencia del trabajo por cuenta ajena','Cualquier enfermedad','Una baja voluntaria'],correct:1,exp:'Es la lesión producida en el trabajo o en el trayecto (accidente in itinere).'},
-    {q:'¿Qué son los riesgos psicosociales?',a:['Riesgos del ruido','Riesgos derivados de la organización: estrés, acoso, burnout…','Riesgos de productos químicos','Accidentes físicos'],correct:1,exp:'Incluyen estrés laboral, acoso moral, burnout y conflictos organizacionales.'},
-    {q:'¿Qué es el burnout?',a:['Un accidente de trabajo','Síndrome de agotamiento emocional, despersonalización y baja realización','Una enfermedad infecciosa','El absentismo repetido'],correct:1,exp:'Incluye agotamiento emocional, cinismo y pérdida de eficacia laboral.'},
-    {q:'¿Qué es el modelo 70-20-10?',a:['70% online, 20% presencial, 10% coaching','70% aprendizaje en el puesto, 20% con otros, 10% formación formal','70% teoría, 20% práctica, 10% evaluación','Sistema de distribución del presupuesto'],correct:1,exp:'El 70% del aprendizaje se da en el puesto, el 20% con otros y el 10% es formal.'},
-    {q:'¿Qué es el e-learning?',a:['Ver vídeos de YouTube','Formación online estructurada con objetivos, contenidos y evaluación','Un PDF enviado por email','Una videoconferencia puntual'],correct:1,exp:'Formación online estructurada, interactiva y con seguimiento del progreso.'},
-    {q:'¿Qué es la gamificación en formación?',a:['Jugar durante la jornada','Aplicar mecánicas de juego para motivar el aprendizaje','Un simulador profesional','Un juego de mesa'],correct:1,exp:'Usa mecánicas de juego para aumentar la motivación y el compromiso.'},
-    {q:'¿Qué papel tiene FUNDAE?',a:['Es una universidad','Gestiona la formación para el empleo, incluida la formación bonificada','Es un sindicato','Es la mutua del Estado'],correct:1,exp:'FUNDAE gestiona la formación para el empleo y permite bonificar cursos con cuotas de SS.'},
-    {q:'¿Qué es el Comité de Seguridad y Salud?',a:['Un sindicato','Órgano paritario de participación en PRL entre empresa y trabajadores','El servicio de prevención','La mutua de accidentes'],correct:1,exp:'Es paritario: reúne a representantes de empresa y de trabajadores.'},
-    {q:'¿Cómo evalúa Kirkpatrick la formación?',a:['Solo con encuestas de satisfacción','Con 4 niveles: reacción, aprendizaje, comportamiento y resultados','Contando asistentes','Solo con evaluaciones finales'],correct:1,exp:'4 niveles: reacción, aprendizaje, cambio de comportamiento y resultados en el negocio.'},
-  ],
-  /* MÓDULO 4 – Legislación Laboral */
-  [
-    {q:'¿Qué es el Estatuto de los Trabajadores?',a:['Un reglamento de empresa','La norma legal básica que regula las relaciones laborales en España','El convenio colectivo del sector','El código de conducta'],correct:1,exp:'El ET regula los derechos y deberes de trabajadores y empresarios en España.'},
-    {q:'¿Qué es un convenio colectivo?',a:['Un contrato individual','Acuerdo negociado entre empresarios y sindicatos sobre condiciones laborales','Una ley del gobierno','Un reglamento interno'],correct:1,exp:'Acuerdo entre empresarios y representantes de trabajadores sobre condiciones laborales.'},
-    {q:'¿Cuál es la jornada laboral máxima en España?',a:['40 horas semanales','35 horas semanales','48 horas semanales','La que fije el empresario'],correct:0,exp:'La jornada máxima legal es de 40 horas semanales de trabajo efectivo.'},
-    {q:'¿Qué son las horas extraordinarias?',a:['Las horas de la jornada regular','Horas trabajadas por encima de la jornada ordinaria, con límite de 80 al año','Horas de formación fuera del horario','Las horas de guardia'],correct:1,exp:'Superan la jornada ordinaria y tienen un límite de 80 horas anuales.'},
-    {q:'¿Qué es el despido procedente?',a:['Despido sin causa','Despido basado en causas objetivas o disciplinarias debidamente acreditadas','Despido con máxima indemnización','Despido pactado'],correct:1,exp:'Se basa en causas objetivas o disciplinarias probadas; la indemnización es menor.'},
-    {q:'¿Qué es el despido improcedente?',a:['Despido con causa justificada','Despido sin causa suficiente que obliga a readmitir o indemnizar con 33 días/año','Despido acordado por ambos','Despido por causas económicas'],correct:1,exp:'Carece de causa suficiente y genera derecho a readmisión o 33 días/año de indemnización.'},
-    {q:'¿Qué es un ERE?',a:['Un procedimiento individual de despido','Procedimiento colectivo para suspender, reducir o extinguir contratos por causas justificadas','Una sanción laboral','Un expediente disciplinario individual'],correct:1,exp:'Procedimiento colectivo para suspender, reducir o extinguir contratos.'},
-    {q:'¿Qué es la Seguridad Social?',a:['Una empresa privada de seguros','Sistema público que cubre enfermedad, desempleo, jubilación y otras contingencias','El impuesto sobre la renta','Un seguro médico privado'],correct:1,exp:'Sistema público de protección frente a contingencias laborales y personales.'},
-    {q:'¿Qué es el finiquito?',a:['La nómina del último mes','Documento que liquida todos los derechos económicos al término del contrato','El contrato de nueva empresa','La carta de despido'],correct:1,exp:'Liquida las cantidades pendientes al finalizar la relación laboral.'},
-    {q:'¿Qué es el período de preaviso?',a:['El período de vacaciones pendiente','Tiempo mínimo de antelación para comunicar la extinción del contrato','El período de prueba','El plazo para pagar el finiquito'],correct:1,exp:'Tiempo mínimo que debe anticiparse la comunicación de extinción del contrato.'},
-    {q:'¿Qué es la incapacidad temporal (IT)?',a:['Un contrato temporal','Situación de baja por enfermedad o accidente con derecho a prestación','Una reducción de jornada','Una excedencia voluntaria'],correct:1,exp:'Situación de baja laboral por enfermedad o accidente con prestación económica.'},
-    {q:'¿Qué es el derecho de huelga?',a:['Un derecho exclusivo de sindicatos','Derecho fundamental de los trabajadores a cesar colectivamente para defender sus intereses','Una medida disciplinaria','Un tipo de cierre patronal'],correct:1,exp:'Derecho fundamental reconocido en la Constitución española.'},
-    {q:'¿Qué tipos de contrato existen en España?',a:['Solo el indefinido','Indefinido, temporal, de formación y aprendizaje, y a tiempo parcial','Solo el temporal','Solo prácticas y obra'],correct:1,exp:'Los principales: indefinido, temporal, formación y aprendizaje, y a tiempo parcial.'},
-    {q:'¿Qué son las infracciones laborales graves (LISOS)?',a:['Solo las que llevan a despido','Incumplimientos que pueden sancionarse con multas importantes','Solo las de PRL','Cualquier incumplimiento del convenio'],correct:1,exp:'Las infracciones graves según la LISOS pueden sancionarse con multas de 626 a 6.250 €.'},
-    {q:'¿Qué es el período de prueba?',a:['Las vacaciones del primer mes','Período inicial en que ambas partes pueden rescindir el contrato sin indemnización','La evaluación del primer año','El contrato temporal'],correct:1,exp:'Permite verificar la idoneidad de ambas partes sin obligación de indemnización.'},
-  ],
-];
-
-/* ============================================================
-   APP STATE
-   ============================================================ */
-let lang = 'de';
-let currentUser = null;
-const qs = {
-  moduleId: null,
-  currentQ: 0,
-  score: 0,
-  answered: false,
-  shuffled: [],
-  completedModules: {},
-  currentRank: 0,
-  lastPct: 0,
-};
-const RANK_ICONS = ['🎓','📋','🗂️','👔','📊','🤝','🏆'];
-const ACHIEVEMENTS = [
-  {id:'first',   icon:'🎯', label:{de:'Erster Quiz',   en:'First Quiz',   es:'Primer Quiz'}},
-  {id:'perfect', icon:'💯', label:{de:'Perfekt',        en:'Perfect',      es:'Perfecto'}},
-  {id:'all5',    icon:'🔥', label:{de:'Alle 5 Module',  en:'All 5 modules',es:'5 Módulos'}},
-  {id:'top',     icon:'🏆', label:{de:'HR Manager',     en:'HR Manager',   es:'HR Manager'}},
-  {id:'sharer',  icon:'📢', label:{de:'Teiler',         en:'Sharer',       es:'Compartidor'}},
-];
-
-/* ============================================================
-   HELPER: Übersetzung abrufen
-   ============================================================ */
-function t(key) {
-  return (TR[lang] && TR[lang][key] !== undefined) ? TR[lang][key] : (TR.de[key] || key);
-}
-
-/* ============================================================
-   HELPER: DOM-Elemente setzen
-   ============================================================ */
-function setText(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
-function setHTML(id, val) { var el = document.getElementById(id); if (el) el.innerHTML   = val; }
-function show(id) { var el = document.getElementById(id); if (el) el.style.display = ''; }
-function hide(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; }
-
-/* ============================================================
-   SEITENNAVIGATION
-   ============================================================ */
-function showPage(id) {
-  // Alle Seiten ausblenden
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-  // Zielseite aktivieren
-  var target = document.getElementById('page-' + id);
-  if (!target) { console.error('Seite nicht gefunden: page-' + id); return; }
-  target.classList.add('active');
-  // Nav-Links aktualisieren
-  document.querySelectorAll('[data-page]').forEach(function(el){
-    el.classList.toggle('active', el.getAttribute('data-page') === id);
-  });
-  window.scrollTo(0, 0);
-  var mc = document.getElementById('main-content');
-  if (mc) mc.focus();
-  // Seiten-spezifisch
-  if (id === 'topics')      renderTopics();
-  if (id === 'quiz-select') { renderRankLadder(); renderLevelCards(); }
-  if (id === 'dashboard')   renderDashboard();
-}
-
-/* ============================================================
-   DRAWER (Mobile-Menü)
-   ============================================================ */
-function openDrawer() {
-  document.getElementById('mobile-drawer').classList.add('open');
-  document.getElementById('drawer-overlay').classList.add('open');
-  document.getElementById('ham-btn').setAttribute('aria-expanded','true');
-}
-function closeDrawer() {
-  document.getElementById('mobile-drawer').classList.remove('open');
-  document.getElementById('drawer-overlay').classList.remove('open');
-  document.getElementById('ham-btn').setAttribute('aria-expanded','false');
-}
-
-/* ============================================================
-   AUTH MODAL
-   ============================================================ */
-function openAuth()  { document.getElementById('auth-modal').classList.add('open'); }
-function closeAuth() { document.getElementById('auth-modal').classList.remove('open'); }
-
-function switchTab(tab) {
-  document.getElementById('form-login').style.display    = tab === 'login'    ? 'flex' : 'none';
-  document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
-  document.getElementById('mtab-login').classList.toggle('active',    tab === 'login');
-  document.getElementById('mtab-register').classList.toggle('active', tab === 'register');
-}
-
-function doLogin(e) {
-  if (e) e.preventDefault();
-  var email = (document.getElementById('li-email').value || '').trim();
-  var pw    =  document.getElementById('li-pw').value || '';
-  if (!email || !pw) { showToast('⚠️ Alle Felder ausfüllen'); return; }
-  var stored = localStorage.getItem('ua_acc_' + email);
-  if (!stored) { showToast('⚠️ Kein Konto gefunden. Bitte registrieren.'); return; }
-  currentUser = JSON.parse(stored);
-  localStorage.setItem('ua_user', JSON.stringify(currentUser));
-  updateAuthUI(); closeAuth();
-  showToast('👋 Willkommen, ' + currentUser.name + '!');
-}
-
-function doRegister(e) {
-  if (e) e.preventDefault();
-  var name  = (document.getElementById('rg-name').value  || '').trim();
-  var email = (document.getElementById('rg-email').value || '').trim();
-  var pw    =  document.getElementById('rg-pw').value    || '';
-  if (!name || !email || !pw) { showToast('⚠️ Alle Felder ausfüllen'); return; }
-  if (pw.length < 8) { showToast('⚠️ Passwort mind. 8 Zeichen'); return; }
-  currentUser = {name:name, email:email, certs:[], xp:0, achievements:[]};
-  localStorage.setItem('ua_acc_' + email, JSON.stringify(currentUser));
-  localStorage.setItem('ua_user', JSON.stringify(currentUser));
-  updateAuthUI(); closeAuth();
-  showToast('🎉 Konto erstellt! Willkommen, ' + name + '!');
-  spawnConfetti();
-}
-
-function logout() {
-  currentUser = null;
-  localStorage.removeItem('ua_user');
-  updateAuthUI(); showPage('home');
-  showToast('👋 Abgemeldet.');
-}
-
-function updateAuthUI() {
-  var navBtn  = document.getElementById('nav-auth-btn');
-  var drawBtn = document.getElementById('drawer-auth-btn');
-  if (currentUser) {
-    var lbl = '👤 ' + currentUser.name.split(' ')[0];
-    if (navBtn)  { navBtn.textContent  = lbl; navBtn.onclick  = function(){ showPage('dashboard'); }; }
-    if (drawBtn) { drawBtn.querySelector('[data-i18n]').textContent = currentUser.name.split(' ')[0];
-                   drawBtn.onclick = function(){ showPage('dashboard'); closeDrawer(); }; }
-  } else {
-    if (navBtn)  { navBtn.textContent  = t('navLogin'); navBtn.onclick  = openAuth; }
-    if (drawBtn) { var sp = drawBtn.querySelector('[data-i18n]'); if(sp) sp.textContent = t('navLogin');
-                   drawBtn.onclick = function(){ openAuth(); closeDrawer(); }; }
-  }
-  // Urkunden-Bereich
-  var cw = document.getElementById('cert-name-wrap');
-  var ch = document.getElementById('cert-login-hint');
-  var bd = document.getElementById('btn-dl');
-  if (cw) cw.style.display = currentUser ? 'block' : 'none';
-  if (ch) ch.style.display = currentUser ? 'none'  : 'block';
-  if (bd) bd.style.display = currentUser ? 'inline-flex' : 'none';
-}
-
-/* ============================================================
-   SPRACHE
-   ============================================================ */
-function setLang(l) {
-  lang = l;
-  document.documentElement.lang = l;
-  // Buttons
-  ['de','en','es'].forEach(function(x){
-    ['btn-'+x,'d-btn-'+x].forEach(function(id){
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.classList.toggle('active', x === l);
-      el.setAttribute('aria-pressed', String(x === l));
-    });
-  });
-  // data-i18n Elemente
-  document.querySelectorAll('[data-i18n]').forEach(function(el){
-    var key = el.getAttribute('data-i18n');
-    if (TR[l] && TR[l][key] !== undefined) {
-      if (el.tagName === 'INPUT') el.placeholder = TR[l][key];
-      else el.textContent = TR[l][key];
-    }
-  });
-  // Dynamische Felder
-  setText('next-btn', t('qNext'));
-  setText('lbl-cor',  t('lCorr'));
-  setText('lbl-wr',   t('lWrong'));
-  setText('lbl-pct',  t('lPct'));
-  var cn = document.getElementById('cert-name');
-  if (cn) cn.placeholder = t('namePH');
-  var lci = document.getElementById('lbl-cert-name');
-  if (lci) lci.textContent = t('lblCertName');
-  updateAuthUI();
-  renderTopics();
-  renderRankLadder();
-  renderLevelCards();
-}
-
-/* ============================================================
-   LEGAL TABS
-   ============================================================ */
-function showLegal(tab) {
-  ['imp','dsde','dses'].forEach(function(id){
-    var el = document.getElementById('legal-' + id);
-    if (el) el.style.display = (id === tab) ? 'block' : 'none';
-  });
-  ['imp','dsde','dses'].forEach(function(id){
-    var btn = document.getElementById('ltab-' + id);
-    if (btn) { btn.classList.toggle('active', id === tab); btn.setAttribute('aria-selected', String(id === tab)); }
-  });
-}
-
-/* ============================================================
-   TOPICS RENDERN
-   ============================================================ */
-function renderTopics() {
-  var grid = document.getElementById('topic-grid');
-  if (!grid) return;
-  var names  = t('moduleNames');
-  var descs  = t('moduleDesc');
-  var emojis = t('moduleEmoji');
-  grid.innerHTML = '';
-  for (var i = 0; i < 5; i++) {
-    (function(idx){
-      var key  = 'mod-' + idx;
-      var pct  = qs.completedModules[key];
-      var card = document.createElement('article');
-      card.className = 'topic-card';
-      card.setAttribute('role','listitem');
-      card.setAttribute('tabindex','0');
-      card.setAttribute('aria-label', names[idx]);
-      var meta = pct !== undefined
-        ? '✅ ' + pct + '%'
-        : '15 ' + t('qPill') + 'en';
-      card.innerHTML =
-        '<div class="topic-icon-wrap" aria-hidden="true">' + emojis[idx] + '</div>' +
-        '<h3>' + names[idx] + '</h3>' +
-        '<p>' + descs[idx] + '</p>' +
-        '<div class="topic-meta">' + meta + '</div>';
-      card.addEventListener('click', function(){ startModule(idx); });
-      card.addEventListener('keypress', function(e){ if(e.key==='Enter') startModule(idx); });
-      grid.appendChild(card);
-    })(i);
-  }
-}
-
-function startModule(moduleId) {
-  qs.moduleId = moduleId;
-  var lbl = document.getElementById('module-label-select');
-  if (lbl) lbl.textContent = t('moduleNames')[moduleId];
-  showPage('quiz-select');
-}
-
-/* ============================================================
-   RANG-LEITER
-   ============================================================ */
-function renderRankLadder() {
-  var el = document.getElementById('rank-ladder');
-  if (!el) return;
-  var ranks = t('ranks');
-  el.innerHTML = '';
-  ranks.forEach(function(r, i){
-    if (i > 0) {
-      var conn = document.createElement('div');
-      conn.className = 'rank-conn' + (i <= qs.currentRank ? ' filled' : '');
-      el.appendChild(conn);
-    }
-    var step = document.createElement('div');
-    step.className = 'rank-step' + (i < qs.currentRank ? ' unlocked' : '') + (i === qs.currentRank ? ' current' : '');
-    step.setAttribute('role','listitem');
-    step.innerHTML = '<div class="rs-icon" aria-hidden="true">' + RANK_ICONS[i] + '</div><span class="rs-lbl">' + r + '</span>';
-    el.appendChild(step);
-  });
-}
-
-/* ============================================================
-   LEVEL-KARTE (pro Modul eine Quiz-Karte)
-   ============================================================ */
-function renderLevelCards() {
-  var el = document.getElementById('level-grid');
-  if (!el || qs.moduleId === null) return;
-  var key = 'mod-' + qs.moduleId;
-  var pct = qs.completedModules[key];
-  el.innerHTML = '';
-  var card = document.createElement('article');
-  card.className = 'level-card';
-  card.setAttribute('role','listitem');
-  var statusHtml = '';
-  if (pct !== undefined) {
-    var stars = pct >= 80 ? 3 : pct >= 50 ? 2 : 1;
-    var s = '';
-    for (var i=0;i<3;i++) s += (i < stars ? '⭐' : '☆');
-    statusHtml = '<div class="level-stars">' + s + ' &nbsp;' + pct + '%</div>';
-  }
-  card.innerHTML =
-    '<div class="lc-icon" aria-hidden="true">' + t('moduleEmoji')[qs.moduleId] + '</div>' +
-    '<h3>' + t('moduleNames')[qs.moduleId] + '</h3>' +
-    '<p>' + t('moduleDesc')[qs.moduleId] + '</p>' +
-    statusHtml +
-    '<div style="margin-top:.75rem">' +
-      '<button class="btn btn-primary btn-sm" id="btn-start-quiz">🚀 ' + t('qsTitle') + '</button>' +
-    '</div>';
-  el.appendChild(card);
-  var sb = document.getElementById('btn-start-quiz');
-  if (sb) sb.addEventListener('click', function(){ startQuiz(qs.moduleId); });
-}
-
-/* ============================================================
-   QUIZ STARTEN
-   ============================================================ */
-function startQuiz(moduleId) {
-  var questions = QDB[moduleId];
-  if (!questions) { showToast('⚠️ Keine Fragen für dieses Modul.'); return; }
-  qs.moduleId  = moduleId;
-  qs.currentQ  = 0;
-  qs.score     = 0;
-  qs.answered  = false;
-  qs.shuffled  = shuffleArray(questions.slice());
-  setText('quiz-title', t('moduleEmoji')[moduleId] + ' ' + t('moduleShort')[moduleId]);
-  setText('q-tot', qs.shuffled.length);
-  setText('q-score', '0');
-  setText('next-btn', t('qNext'));
-  showPage('quiz');
-  renderQuestion();
-}
-
-/* ============================================================
-   FRAGE RENDERN
-   ============================================================ */
-function renderQuestion() {
-  var q     = qs.shuffled[qs.currentQ];
-  var total = qs.shuffled.length;
-  qs.answered = false;
-  setText('q-cur', qs.currentQ + 1);
-  setText('q-num', t('qLabel') + ' ' + (qs.currentQ + 1) + ' ' + t('qOf') + ' ' + total);
-  setText('q-text', q.q);
-  var pf = document.getElementById('prog-fill');
-  if (pf) {
-    var pct = (qs.currentQ / total) * 100;
-    pf.style.width = pct + '%';
-    pf.parentElement.setAttribute('aria-valuenow', Math.round(pct));
-  }
-  hide('explanation'); hide('error-msg'); hide('next-btn');
-  var cont = document.getElementById('answers');
-  if (!cont) return;
-  cont.innerHTML = '';
-  var letters  = ['A','B','C','D'];
-  var shuffled = shuffleAnswers(q);
-  var corrIdx  = shuffled.findIndex(function(a){ return a.origIdx === q.correct; });
-  shuffled.forEach(function(ans, i){
-    var btn = document.createElement('button');
-    btn.className = 'answer-btn';
-    btn.setAttribute('aria-label', letters[i] + ': ' + ans.text);
-    btn.innerHTML = '<span class="answer-letter" aria-hidden="true">' + letters[i] + '</span>' + ans.text;
-    btn.addEventListener('click', function(){ handleAnswer(i, corrIdx, q.exp, cont); });
-    cont.appendChild(btn);
-  });
-}
-
-/* ============================================================
-   ANTWORT VERARBEITEN
-   ============================================================ */
-function handleAnswer(selected, correct, explanation, container) {
-  if (qs.answered) return;
-  qs.answered = true;
-  var btns = container.querySelectorAll('.answer-btn');
-  btns.forEach(function(b){ b.disabled = true; });
-  var isOk = (selected === correct);
-  if (isOk) { qs.score++; setText('q-score', qs.score); btns[selected].classList.add('correct'); }
-  else       { btns[selected].classList.add('wrong'); if (btns[correct]) btns[correct].classList.add('missed'); }
-  var expl = document.getElementById('explanation');
-  if (expl) { expl.innerHTML = '<strong>' + (isOk ? t('qRight') : t('qWrong')) + '</strong> ' + explanation; expl.style.display = 'block'; }
-  show('next-btn');
-}
-
-function nextQ() {
-  qs.currentQ++;
-  if (qs.currentQ >= qs.shuffled.length) showResult();
-  else renderQuestion();
-}
-
-function retryLevel() {
-  if (qs.moduleId !== null) startQuiz(qs.moduleId);
-}
-
-/* ============================================================
-   ERGEBNIS ANZEIGEN
-   ============================================================ */
-function showResult() {
-  var total = qs.shuffled.length;
-  var cor   = qs.score;
-  var pct   = Math.round((cor / total) * 100);
-  qs.lastPct = pct;
-  // Speichern
-  var key  = 'mod-' + qs.moduleId;
-  qs.completedModules[key] = Math.max(qs.completedModules[key] || 0, pct);
-  // Rang
-  var rankedUp = false;
-  var newRank  = pct >= 90 ? 6 : pct >= 75 ? 4 : pct >= 50 ? 2 : 0;
-  if (newRank > qs.currentRank) { qs.currentRank = newRank; rankedUp = true; }
-  saveLocalState();
-  // User updaten
-  if (currentUser) {
-    var tiers2 = t('certTiers');
-    var tier2  = tiers2.find(function(ti){ return pct>=ti.min && pct<=ti.max; }) || tiers2[0];
-    currentUser.certs = currentUser.certs || [];
-    currentUser.certs.push({lv:t('moduleShort')[qs.moduleId], pct:pct, medal:tier2.medal, date:new Date().toLocaleDateString()});
-    currentUser.xp = (currentUser.xp || 0) + Math.round(pct/10)*5;
-    if (!currentUser.achievements.includes('first'))   currentUser.achievements.push('first');
-    if (pct===100 && !currentUser.achievements.includes('perfect')) currentUser.achievements.push('perfect');
-    if (Object.keys(qs.completedModules).length >= 5 && !currentUser.achievements.includes('all5')) currentUser.achievements.push('all5');
-    if (qs.currentRank >= 6 && !currentUser.achievements.includes('top')) currentUser.achievements.push('top');
-    localStorage.setItem('ua_user', JSON.stringify(currentUser));
-  }
-  // DOM befüllen
-  var tiers   = t('certTiers');
-  var tier    = tiers.find(function(ti){ return pct>=ti.min && pct<=ti.max; }) || tiers[0];
-  var rtIdx   = pct>=90?3:pct>=70?2:pct>=50?1:0;
-  var ratIdx  = pct>=80?2:pct>=54?1:0;
-  var ranks   = t('ranks');
-  setText('res-medal',   tier.medal);
-  setText('res-title',   t('resultT')[rtIdx]);
-  setHTML('res-rank',    t('rankNow') + ' <strong>' + RANK_ICONS[qs.currentRank] + ' ' + ranks[qs.currentRank] + '</strong>');
-  setHTML('score-num',   cor + '<small>/' + total + '</small>');
-  setTimeout(function(){
-    var ring = document.getElementById('score-ring');
-    if (ring) ring.style.background = 'conic-gradient(var(--indigo) ' + (pct*3.6) + 'deg, var(--border) 0deg)';
-  }, 300);
-  setText('s-cor',   cor);
-  setText('s-wr',    total - cor);
-  setText('s-pct',   pct + '%');
-  setText('lbl-cor', t('lCorr'));
-  setText('lbl-wr',  t('lWrong'));
-  setText('lbl-pct', t('lPct'));
-  setText('rating-badge', t('ratings')[ratIdx]);
-  var banner = document.getElementById('rank-up-banner');
-  if (banner) {
-    banner.style.display = rankedUp ? 'block' : 'none';
-    if (rankedUp) banner.innerHTML = t('rankUp') + ' <strong>' + RANK_ICONS[qs.currentRank] + ' ' + ranks[qs.currentRank] + '</strong>';
-  }
-  updateAuthUI();
-  showPage('result');
-  if (pct >= 70) spawnConfetti();
-}
-
-/* ============================================================
-   PDF URKUNDE
-   ============================================================ */
-function downloadCert() {
-  if (!currentUser) { openAuth(); return; }
-  var ni   = document.getElementById('cert-name');
-  var name = ni ? ni.value.trim() : '';
-  if (!name) name = currentUser.name;
-  if (!name) { showToast(t('noName')); return; }
-  var pct   = qs.lastPct;
-  var total = qs.shuffled ? qs.shuffled.length : 15;
-  var cor   = qs.score;
-  var tiers = t('certTiers');
-  var tier  = tiers.find(function(ti){ return pct>=ti.min && pct<=ti.max; }) || tiers[0];
-  var today = new Date().toLocaleDateString(lang==='es'?'es-ES':lang==='en'?'en-GB':'de-DE',{year:'numeric',month:'long',day:'numeric'});
-  var jsPDFLib = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
-  if (!jsPDFLib) { showToast('⚠️ PDF-Bibliothek nicht geladen'); return; }
-  var doc = new jsPDFLib({orientation:'landscape',unit:'mm',format:'a4'});
-  var W=297,H=210;
-  doc.setFillColor(248,250,252); doc.rect(0,0,W,H,'F');
-  doc.setFillColor(79,70,229); doc.rect(0,0,W,16,'F');
-  doc.setFillColor(13,148,136); doc.rect(W-7,0,7,H,'F');
-  doc.setDrawColor(79,70,229); doc.setLineWidth(.8); doc.rect(10,22,W-20,H-30);
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-  doc.text('UPSKILL ACADEMY · © Sara Manoochehri',W/2,10,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(79,70,229);
-  doc.text(tier.title.toUpperCase(),W/2,48,{align:'center'});
-  doc.setDrawColor(79,70,229); doc.setLineWidth(.7); doc.line(W/2-55,53,W/2+55,53);
-  var intro = lang==='es'?'Se certifica que':lang==='en'?'This certifies that':'Hiermit wird bestätigt, dass';
-  doc.setFont('helvetica','italic'); doc.setFontSize(10); doc.setTextColor(100,116,139);
-  doc.text(intro,W/2,63,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(30,41,59);
-  doc.text(name,W/2,78,{align:'center'});
-  var nw=doc.getTextWidth(name);
-  doc.setDrawColor(13,148,136); doc.setLineWidth(.5); doc.line(W/2-nw/2,81,W/2+nw/2,81);
-  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(100,116,139);
-  doc.text(t('certHereby'),W/2,92,{align:'center'});
-  doc.text('"'+t('moduleNames')[qs.moduleId]+'" '+t('certComp'),W/2,101,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setTextColor(79,70,229);
-  doc.text(cor+' '+t('qOf')+' '+total+' ('+pct+'%) '+t('certScored'),W/2,110,{align:'center'});
-  doc.setFillColor(79,70,229); doc.roundedRect(W/2-15,H-48,30,13,2,2,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
-  doc.text(pct+'%',W/2,H-38,{align:'center'});
-  doc.setDrawColor(226,232,240); doc.setLineWidth(.3); doc.line(36,H-35,W-36,H-35);
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,116,139);
-  doc.line(26,H-24,108,H-24); doc.text(t('certSign'),67,H-20,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setTextColor(30,41,59); doc.text('Sara Manoochehri',67,H-15,{align:'center'});
-  doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
-  doc.line(W-108,H-24,W-26,H-24); doc.text(t('certDate'),W-67,H-20,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setTextColor(30,41,59); doc.text(today,W-67,H-15,{align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(148,163,184);
-  doc.text('© Copyright by Sara Manoochehri · Upskill Academy',W/2,H-8,{align:'center'});
-  doc.save('Upskill_Academy_'+name.replace(/[^a-zA-Z0-9]/g,'_')+'.pdf');
-  showToast(t('dlOk'));
-}
-
-/* ============================================================
-   DASHBOARD
-   ============================================================ */
-function renderDashboard() {
-  if (!currentUser) { openAuth(); return; }
-  setText('dash-av',    currentUser.name.charAt(0).toUpperCase());
-  setText('dash-name',  currentUser.name);
-  setText('dash-email', currentUser.email);
-  var certs = currentUser.certs || [];
-  setText('d-quizzes', certs.length);
-  setText('d-certs',   certs.length);
-  var xp=currentUser.xp||0, lv=Math.floor(xp/100)+1, prog=xp%100;
-  setText('xp-lv',  'Level '+lv);
-  setText('xp-pts', xp+' XP');
-  var xf=document.getElementById('xp-fill'); if(xf) xf.style.width=prog+'%';
-  var cl=document.getElementById('cert-list');
-  if(cl){
-    if(!certs.length){ cl.innerHTML='<p style="color:var(--text-muted);font-size:.875rem">'+t('noCerts')+'</p>'; }
-    else{ cl.innerHTML=''; certs.forEach(function(c){ cl.innerHTML+='<div class="cert-item"><span class="ci-medal">'+c.medal+'</span><div class="ci-info"><div class="ci-name">'+c.lv+'</div><div class="ci-date">'+c.date+'</div></div><span class="ci-pct">'+c.pct+'%</span></div>'; }); }
-  }
-  var ag=document.getElementById('ach-grid');
-  if(ag){ ag.innerHTML=''; ACHIEVEMENTS.forEach(function(a){ var earned=(currentUser.achievements||[]).includes(a.id); var lbl=a.label[lang]||a.label.de; ag.innerHTML+='<div class="ach '+(earned?'earned':'')+'"><div class="ach-icon">'+a.icon+'</div><div class="ach-name">'+lbl+'</div></div>'; }); }
-  var po=document.getElementById('prog-overview');
-  if(po){ po.innerHTML=''; t('moduleShort').forEach(function(name,i){ var key='mod-'+i; var p=qs.completedModules[key]||0; po.innerHTML+='<div style="margin-bottom:.625rem"><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.25rem"><span>'+name+'</span><span style="color:var(--indigo);font-weight:600">'+p+'%</span></div><div class="xp-bar" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100"><div class="xp-fill" style="width:'+p+'%"></div></div></div>'; }); }
-}
-
-/* ============================================================
-   SHARE
-   ============================================================ */
-function shareWA() {
-  var txt=encodeURIComponent('🎓 Ich habe '+qs.lastPct+'% im Upskill Academy Quiz ('+t('moduleShort')[qs.moduleId]+') erreicht! upskill-academy.com');
-  window.open('https://wa.me/?text='+txt,'_blank');
-  if(currentUser && !currentUser.achievements.includes('sharer')){ currentUser.achievements.push('sharer'); localStorage.setItem('ua_user',JSON.stringify(currentUser)); }
-  showToast('📱 WhatsApp wird geöffnet…');
-}
-function shareLI() {
-  window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent('https://upskill-academy.com'),'_blank');
-  showToast('💼 LinkedIn wird geöffnet…');
-}
-function copyLink() {
-  var txt='🎓 '+qs.lastPct+'% im Upskill Academy Quiz! https://upskill-academy.com';
-  if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(function(){ showToast('✅ Kopiert!'); }); }
-  else{ var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showToast('✅ Kopiert!'); }
-}
-
-/* ============================================================
-   ACCESSIBILITY TOOLBAR
-   ============================================================ */
-function setFontSize(s){ document.body.classList.remove('fs-lg','fs-xl'); if(s!=='normal') document.body.classList.add('fs-'+s); }
-function toggleTheme(){ var d=document.documentElement; d.setAttribute('data-theme', d.getAttribute('data-theme')==='dark'?'light':'dark'); }
-function toggleContrast(){ document.body.classList.toggle('hc'); }
-function toggleLineHeight(){ document.body.classList.toggle('line-height-lg'); }
-function resetA11y(){ document.body.classList.remove('fs-lg','fs-xl','hc','line-height-lg'); document.documentElement.setAttribute('data-theme','light'); }
-
-/* ============================================================
-   UTILITIES
-   ============================================================ */
-function showToast(msg) {
-  var el=document.getElementById('toast');
-  if(!el) return;
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(function(){ el.classList.remove('show'); }, 2800);
-}
-function spawnConfetti() {
-  var cols=['#4F46E5','#0D9488','#F59E0B','#F43F5E','#10B981'];
-  for(var i=0;i<55;i++){
-    (function(){ var el=document.createElement('div'); el.className='cp'; var sz=6+Math.random()*8;
-      el.style.cssText='left:'+Math.random()*100+'vw;top:-10px;width:'+sz+'px;height:'+sz+'px;background:'+cols[Math.floor(Math.random()*cols.length)]+';border-radius:'+(Math.random()>.5?'50%':'2px')+';animation-duration:'+(1.5+Math.random()*2)+'s;animation-delay:'+(Math.random()*.8)+'s;';
-      document.body.appendChild(el); setTimeout(function(){ el.remove(); },4000);
-    })();
-  }
-}
-function shuffleArray(arr) {
-  for(var i=arr.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t2=arr[i];arr[i]=arr[j];arr[j]=t2; }
-  return arr;
-}
-function shuffleAnswers(q) {
-  return shuffleArray(q.a.map(function(text,idx){ return {text:text,origIdx:idx}; }));
-}
-function saveLocalState() {
-  try{ localStorage.setItem('ua_v5',JSON.stringify({cm:qs.completedModules,r:qs.currentRank})); }catch(e){}
-}
-function loadLocalState() {
-  try{
-    var raw=localStorage.getItem('ua_v5');
-    if(raw){ var d=JSON.parse(raw); qs.completedModules=d.cm||{}; qs.currentRank=d.r||0; }
-    var ur=localStorage.getItem('ua_user');
-    if(ur){ currentUser=JSON.parse(ur); }
-  }catch(e){}
-}
-
-/* ============================================================
-   INIT – alles nach DOMContentLoaded
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', function() {
-  loadLocalState();
-
-  // Footer-Jahr
-  var fy=document.getElementById('foot-year'); if(fy) fy.textContent=new Date().getFullYear();
-
-  // Sprache anwenden
-  setLang('de');
-
-  // Nav scrolled
-  window.addEventListener('scroll',function(){ document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>10); });
-
-  // ── Alle data-page Buttons (Nav + Drawer + Footer) ──
-  document.querySelectorAll('[data-page]').forEach(function(el){
-    el.addEventListener('click',function(){
-      var page  = el.getAttribute('data-page');
-      var legal = el.getAttribute('data-legal');
-      showPage(page);
-      if(legal) showLegal(legal);
-      closeDrawer();
-    });
-  });
-
-  // ── Logo ──
-  var lb=document.getElementById('logo-btn');          if(lb) lb.addEventListener('click',function(){ showPage('home'); });
-  var ld=document.getElementById('logo-drawer-btn');   if(ld) ld.addEventListener('click',function(){ showPage('home'); closeDrawer(); });
-
-  // ── Hamburger + Drawer ──
-  document.getElementById('ham-btn').addEventListener('click', openDrawer);
-  document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
-  document.getElementById('drawer-close-btn').addEventListener('click', closeDrawer);
-
-  // ── Sprach-Buttons ──
-  ['de','en','es'].forEach(function(l){
-    var b1=document.getElementById('btn-'+l);   if(b1) b1.addEventListener('click',function(){ setLang(l); });
-    var b2=document.getElementById('d-btn-'+l); if(b2) b2.addEventListener('click',function(){ setLang(l); });
-  });
-
-  // ── Auth ──
-  var nab=document.getElementById('nav-auth-btn');    if(nab) nab.addEventListener('click',openAuth);
-  var dab=document.getElementById('drawer-auth-btn'); if(dab) dab.addEventListener('click',function(){ openAuth(); closeDrawer(); });
-  document.getElementById('auth-modal').addEventListener('click',function(e){ if(e.target===this) closeAuth(); });
-  document.getElementById('modal-close-btn').addEventListener('click', closeAuth);
-  document.getElementById('mtab-login').addEventListener('click',    function(){ switchTab('login'); });
-  document.getElementById('mtab-register').addEventListener('click', function(){ switchTab('register'); });
-  document.getElementById('form-login').addEventListener('submit',    doLogin);
-  document.getElementById('form-register').addEventListener('submit', doRegister);
-  var bg=document.getElementById('btn-google'); if(bg) bg.addEventListener('click',function(){ showToast('Google-Login kommt bald!'); });
-
-  // ── Hero-Buttons ──
-  var hq=document.getElementById('btn-hero-quiz'); if(hq) hq.addEventListener('click',function(){ showPage('topics'); });
-  var hm=document.getElementById('btn-hero-more'); if(hm) hm.addEventListener('click',function(){ showPage('about-platform'); });
-
-  // ── Quiz-Navigation ──
-  var bts=document.getElementById('back-to-topics'); if(bts) bts.addEventListener('click',function(){ showPage('topics'); });
-  var bss=document.getElementById('back-to-select'); if(bss) bss.addEventListener('click',function(){ showPage('quiz-select'); });
-  var nb=document.getElementById('next-btn');        if(nb)  nb.addEventListener('click', nextQ);
-
-  // ── Result-Buttons ──
-  var br=document.getElementById('btn-retry');          if(br) br.addEventListener('click', retryLevel);
-  var bd=document.getElementById('btn-dl');             if(bd) bd.addEventListener('click', downloadCert);
-  var bo=document.getElementById('btn-ovr');            if(bo) bo.addEventListener('click', function(){ showPage('quiz-select'); });
-  var bcr=document.getElementById('btn-cert-register'); if(bcr) bcr.addEventListener('click', openAuth);
-
-  // ── Share ──
-  var swa=document.getElementById('btn-share-wa'); if(swa) swa.addEventListener('click', shareWA);
-  var sli=document.getElementById('btn-share-li'); if(sli) sli.addEventListener('click', shareLI);
-  var scp=document.getElementById('btn-share-cp'); if(scp) scp.addEventListener('click', copyLink);
-
-  // ── Certificate-Seite ──
-  var bcp=document.getElementById('btn-cert-page-reg'); if(bcp) bcp.addEventListener('click', openAuth);
-
-  // ── Legal-Tabs ──
-  var lti=document.getElementById('ltab-imp');  if(lti) lti.addEventListener('click',function(){ showLegal('imp'); });
-  var ltd=document.getElementById('ltab-dsde'); if(ltd) ltd.addEventListener('click',function(){ showLegal('dsde'); });
-  var lts=document.getElementById('ltab-dses'); if(lts) lts.addEventListener('click',function(){ showLegal('dses'); });
-
-  // ── Dashboard Logout ──
-  var bl=document.getElementById('btn-logout'); if(bl) bl.addEventListener('click', logout);
-
-  // ── Barrierefreiheit ──
-  document.getElementById('a11y-normal').addEventListener('click',   function(){ setFontSize('normal'); });
-  document.getElementById('a11y-lg').addEventListener('click',       function(){ setFontSize('lg'); });
-  document.getElementById('a11y-xl').addEventListener('click',       function(){ setFontSize('xl'); });
-  document.getElementById('a11y-theme').addEventListener('click',    toggleTheme);
-  document.getElementById('a11y-contrast').addEventListener('click', toggleContrast);
-  document.getElementById('a11y-lh').addEventListener('click',       toggleLineHeight);
-  document.getElementById('a11y-reset').addEventListener('click',    resetA11y);
-
-  // Escape-Taste
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeAuth(); closeDrawer(); } });
-
-  updateAuthUI();
-  console.log('✅ Upskill Academy bereit.');
-});
-</script>
-
-</body>
-</html>
+    // QUIZ-FRAGEN auf Deutsch
+    questions:[
+      /* Modul 0 */
+      [{q:'Was ist die Dirección Estratégica de RRHH?',a:['Nur Nóminas verwalten','HR in die Unternehmensstrategie integrieren','Personal temporär einstellen','Nur Abwesenheiten verwalten'],c:1,e:'Die strategische HR-Direktion integriert die Personalverwaltung in den Kern der Unternehmensstrategie.'},
+       {q:'Woher stammt jede HR-Strategie?',a:['Vom Wunsch des Direktors','Von der Unternehmensstrategie','Von gesetzlichen Anforderungen','Von Markttrends'],c:1,e:'Jede HR-Strategie leitet sich direkt aus der Unternehmensstrategie ab.'},
+       {q:'Was kennzeichnet Etapa 1 (Personalverwaltung)?',a:['Proaktiv und analytisch','Reaktiv – nur Verträge und Nóminas','Talentplanung','People Analytics'],c:1,e:'Etapa 1 ist reaktiv: Verwaltet nur Verträge und Gehaltsabrechnungen ohne vorausschauende Planung.'},
+       {q:'Was bedeutet "reaktiv" im HR-Kontext?',a:['Vor Problemen handeln','Erst handeln wenn das Problem bereits eingetreten ist','Daten analysieren','Talent strategisch planen'],c:1,e:'Reaktiv bedeutet: nur handeln wenn etwas schiefläuft, ohne Vorausplanung.'},
+       {q:'Typisches Beispiel für HR in Etapa 1?',a:['People Analytics','An der Strategie teilnehmen','Erst Ersatz suchen wenn jemand bereits gegangen ist','Klimabefragungen'],c:2,e:'In Etapa 1 sucht HR erst Ersatz nachdem der Mitarbeiter bereits gegangen ist.'},
+       {q:'Was bringt Etapa 2 gegenüber Etapa 1?',a:['Nur Bürokratie','Spezialisierte Funktionen: Auswahl, Schulung, Motivation','Vollständige strategische Integration','Vollständige Automatisierung'],c:1,e:'Etapa 2 bringt spezialisierte Funktionen, aber ohne strategische Beteiligung.'},
+       {q:'Was kennzeichnet Etapa 3?',a:['Nur Nóminas','HR ist Schlüsselabteilung und nimmt an der Unternehmensleitung teil','Nur mit Gewerkschaften','Marketing'],c:1,e:'In Etapa 3 ist HR proaktiv, analytisch und nimmt an Unternehmensentscheidungen teil.'},
+       {q:'Welche Technologien treiben das strategische HR voran?',a:['Fax und Drucker','Digitalisierung, Homeoffice, Automatisierung und KI','Nur soziale Netzwerke','Nur Cloud-Speicher'],c:1,e:'Digitalisierung, Homeoffice, Automatisierung und KI sind die Haupttreiber.'},
+       {q:'Was ist People Analytics?',a:['Gehaltsabrechnungssoftware','Analyse von Personaldaten für evidenzbasierte Entscheidungen','Externer Rekrutierungsprozess','Teambuilding-Methode'],c:1,e:'People Analytics wendet Datenanalyse auf das Personalmanagement an.'},
+       {q:'Was muss HR bei internationaler Expansion vorsehen?',a:['Nur mehr Büromaterial','Profile mit Sprachkenntnissen, interkulturellen Kompetenzen und Mobilitätspolitiken','Mitarbeiter entlassen','Nur Gehaltsstrukturen anpassen'],c:1,e:'HR muss Sprachkenntnisse, interkulturelle Kompetenzen und Mobilitätspolitiken antizipieren.'},
+       {q:'Ziel der Ausrichtung von HR auf die Strategie?',a:['Kosten minimieren','Sicherstellen dass Menschen den Wettbewerbsvorteil vorantreiben','Nur Abwesenheiten verwalten','Anwesenheit kontrollieren'],c:1,e:'Die Ausrichtung stellt sicher, dass Menschen Quelle des Wettbewerbsvorteils sind.'},
+       {q:'Was unterscheidet den HRBP vom Generalisten?',a:['HRBP macht nur Nóminas','HRBP agiert als strategischer Berater einer Geschäftseinheit','Kein Unterschied','HRBP macht nur Selektion'],c:1,e:'Der HRBP ist HR-Spezialist und strategischer Partner einer konkreten Geschäftseinheit.'},
+       {q:'Was ist personenbasierter Wettbewerbsvorteil?',a:['Niedrigere Gehälter','Personen die schwer zu imitieren, gut organisiert und nachhaltig sind','Mehr Technologie','Mehr Werbung'],c:1,e:'Personen schaffen Vorteil wenn sie schwer zu imitieren, wertschöpfend und nachhaltig sind.'},
+       {q:'Was ist strategische HR-Planung?',a:['Auf Vakanzen reagieren','Antizipieren welche Personen für zukünftige Ziele benötigt werden','Nur Nóminas verwalten','Ohne Kriterien einstellen'],c:1,e:'Antizipiert welche Personen, welche Profile und wann sie benötigt werden.'},
+       {q:'Typische HR-KPIs im strategischen Bereich?',a:['Nur Aktienkurs','Fluktuation, Absentismus, Deckungszeit, Schulungsstunden und Zufriedenheit','Nur Umsatz','Nur Kundenbewertungen'],c:1,e:'KPIs: Fluktuation, Absentismus, Deckungszeit, Schulungen und Zufriedenheit.'}],
+      /* Modul 1 */
+      [{q:'Erster Schritt im Auswahlprozess?',a:['Stellenanzeige veröffentlichen','Das Stellenprofil definieren','Vorstellungsgespräche führen','Vertrag unterzeichnen'],c:1,e:'Vor der Veröffentlichung muss das Profil definiert werden: Kompetenzen, Ausbildung und Erfahrung.'},
+       {q:'Was ist Onboarding?',a:['Entlassungsprozess','Integrations- und Eingewöhnungsprozess neuer Mitarbeiter','Jährliche Leistungsbeurteilung','Betriebsklimabefragung'],c:1,e:'Onboarding erleichtert die Eingliederung und Anpassung neuer Mitarbeiter.'},
+       {q:'Was ist ein kompetenzbasiertes Interview?',a:['Informelles Gespräch','Bewertet vergangenes Verhalten zur Vorhersage zukünftiger Leistung','Schriftlicher Test','Betriebsbesichtigung'],c:1,e:'Nutzt echte Vergangenheitsbeispiele zur Vorhersage zukünftigen Verhaltens.'},
+       {q:'Was ist interne Rekrutierung?',a:['Familienmitglieder einstellen','Vakanzen mit bereits vorhandenen Organisationsmitgliedern besetzen','Auf externen Portalen veröffentlichen','Über Zeitarbeitsfirmen einstellen'],c:1,e:'Nutzt vorhandenes Talent der Organisation zur Vakanzenbesetzung.'},
+       {q:'Was ist ein Assessment Center?',a:['Weiterbildungszentrum','Methode mit mehreren Tests zur ganzheitlichen Kandidatenbewertung','Arbeitsamt','Einzelner Persönlichkeitstest'],c:1,e:'Nutzt Rollenspiele und Tests zur ganzheitlichen Kompetenzbewertung.'},
+       {q:'Was ist Leistungsmanagement?',a:['Anwesenheitskontrolle','Kontinuierlicher Prozess aus Zielsetzung, Begleitung und Leistungsbewertung','Nur Bonus berechnen','Verträge prüfen'],c:1,e:'Kontinuierlicher Zyklus: Ziele setzen, Feedback geben und Ergebnisse bewerten.'},
+       {q:'Was ist 360-Grad-Feedback?',a:['Nur Vorgesetzte bewerten','Bewertung durch Vorgesetzte, Kollegen, Mitarbeiter und Selbsteinschätzung','Persönlichkeitstest','Kundenbefragung'],c:1,e:'Sammelt Meinungen aus dem gesamten beruflichen Umfeld des Beurteilten.'},
+       {q:'Unterschied zwischen Aus- und Weiterbildung vs. Entwicklung?',a:['Gleich','Ausbildung deckt aktuelle Bedürfnisse; Entwicklung bereitet auf die Zukunft vor','Entwicklung nur für Manager','Ausbildung nur technisch'],c:1,e:'Ausbildung löst unmittelbare Bedürfnisse; Entwicklung bereitet auf zukünftige Aufgaben vor.'},
+       {q:'Was ist die Schulungsbedarfsanalyse (SBA)?',a:['Kurspräferenzen abfragen','Prozess zur Identifizierung der Lücke zwischen Ist- und Soll-Kompetenzen','Kurskatalog prüfen','Budget berechnen'],c:1,e:'Identifiziert die Lücke zwischen vorhandenen und benötigten Kompetenzen.'},
+       {q:'Was ist ein Karriereplan?',a:['Lebenslauf des Mitarbeiters','Entwicklungsfahrplan innerhalb des Unternehmens','Unbefristeter Arbeitsvertrag','Ruhestandsplan'],c:1,e:'Definiert den beruflichen Werdegang und die erforderlichen Entwicklungsmaßnahmen.'},
+       {q:'Was ist Mentoring?',a:['Vertragsart','Erfahrener Profi begleitet Entwicklung eines anderen','Mitarbeitervorteilsprogramm','Jährliche Beurteilung'],c:1,e:'Der Mentor unterstützt die berufliche Entwicklung des Mentees mit seiner Erfahrung.'},
+       {q:'Was ist Absentismus?',a:['Jahresurlaub','Ungeplante Abwesenheiten gemessen als % verlorener Stunden','Mutterschaftsurlaub','Feiertage'],c:1,e:'Ungeplante Abwesenheiten, gemessen als % verlorener gegenüber geplanten Stunden.'},
+       {q:'Wie wird die Fluktuationsrate berechnet?',a:['Abgänge / Gesamtmitarbeiter','(Anzahl Abgänge / Durchschnittsbelegschaft) × 100','Krankheitstage × Gehalt','Gesamtabgänge im Jahr'],c:1,e:'Fluktuation = (Anzahl Abgänge / Durchschnittsbelegschaft) × 100.'},
+       {q:'Was ist ein Austrittsinterview?',a:['Abschlussgespräch Bewerbungsprozess','Gespräch bei Beendigung des Arbeitsverhältnisses zur Ursachenfindung','Abschließende Leistungsbeurteilung','Sozialversicherungsabmeldung'],c:1,e:'Sammelt wichtige Informationen zur Verbesserung der Mitarbeiterbindung.'},
+       {q:'Was ist Employer Branding?',a:['Produktwerbung','Image des Unternehmens als Arbeitgeber zur Talent-Anziehung und -Bindung','CEO-Marke','Unternehmenslogo'],c:1,e:'Aufbau des Rufs als erstrebenswerter Arbeitgeber.'}],
+      /* Modul 2 */
+      [{q:'Was ist Vergütungspolitik?',a:['Nur Grundgehalt','Entscheidungsrahmen für faire und wettbewerbsfähige Vergütung','Tarifvertrag','Nur Sozialleistungen'],c:1,e:'Definiert Vergütungskriterien: Fix, variabel, Leistungen und Gerechtigkeit.'},
+       {q:'Unterschied Brutto- vs. Nettogehalt?',a:['Gleich','Brutto = Gesamtvergütung; Netto = was nach Abzügen ausgezahlt wird','Netto ist größer','Brutto ist nur Grundgehalt'],c:1,e:'Brutto ist die vereinbarte Gesamtvergütung; Netto ist nach Steuer- und Sozialabzügen.'},
+       {q:'Was ist der gesetzliche Mindestlohn (SMI)?',a:['Branchendurchschnitt','Gesetzliche Mindestvergütung die jeder Arbeitnehmer beanspruchen kann','Führungsgehalt','Tarifvertragsgehalt'],c:1,e:'Der SMI ist die gesetzliche Mindestvergütung vom Staat festgelegt.'},
+       {q:'Was ist variable Vergütung?',a:['Festes Monatsgehalt','Vergütungsteil gebunden an Leistung, Ergebnisse oder Zielerreichung','Sozialleistungen','Überstunden'],c:1,e:'Belohnt Ergebnisse: Provisionen, Boni, Gewinnbeteiligung usw.'},
+       {q:'Was sind Sozialleistungen (Fringe Benefits)?',a:['Grundgehalt','Zusätzliche nicht-monetäre Vergütung: Krankenversicherung, Rente, Auto…','Überstunden','Verkaufsboni'],c:1,e:'Ergänzen das Gehalt mit Elementen wie Krankenversicherung oder Rentenplan.'},
+       {q:'Was ist eine Gehaltsband?',a:['Tarifvertragsgehalt','Vergütungsspanne eines Stellenprofils: Minimum, Mittelpunkt und Maximum','Dienstalterszulage','Nettogehalt'],c:1,e:'Definiert die Vergütungsspanne einer Stelle mit Minimum, Mittelpunkt und Maximum.'},
+       {q:'Was ist interne Gerechtigkeit?',a:['Alle verdienen gleich','Gerechtigkeitswahrnehmung beim Vergleich interner Vergütungen','Niemand kennt Gehälter','Nur Tarifvertrag einhalten'],c:1,e:'Gewährleistet, dass Gehaltsunterschiede intern fair und konsistent sind.'},
+       {q:'Was ist externe Wettbewerbsfähigkeit?',a:['Weniger zahlen als Konkurrenz','Gehaltspositionierung gegenüber Markt zur Talent-Anziehung','Mehr Urlaub','Nur Boni verbessern'],c:1,e:'Vergleicht unsere Gehälter mit dem Arbeitsmarkt um attraktiv zu sein.'},
+       {q:'Wozu dient eine Gehaltserhebung?',a:['Zufriedenheit messen','Marktdaten erhalten und Gehaltspolitik anpassen','Gehaltsabrechnungen berechnen','Tarifvertrag verhandeln'],c:1,e:'Liefert Marktdaten zur Anpassung der Vergütungspolitik.'},
+       {q:'Was ist flexible Vergütung?',a:['Monatliches Gehalt ändern','System zur steuerlichen Umwidmung eines Teils des Bruttogehalts','Teilzeit mit reduziertem Gehalt','Sachbezüge'],c:1,e:'Ermöglicht dem Mitarbeiter steuerlich vorteilhafte Umwidmung eines Teils des Bruttolohns.'},
+       {q:'Was ist emotionales Gehalt?',a:['Emotionaler Bonus in Geld','Nicht-monetäre Leistungen die Arbeitszufriedenheit verbessern','Rentenplan','Nur Homeoffice'],c:1,e:'Umfasst Flexibilität, Work-Life-Balance, Anerkennung und Wohlbefindenstekoren.'},
+       {q:'Was ist Stellenbewertung?',a:['Leistung des Mitarbeiters bewerten','Systematischer Prozess zur Bestimmung der relativen Wichtigkeit jeder Stelle','Bonus berechnen','Verträge prüfen'],c:1,e:'Bestimmt die relative Gewichtung jeder Stelle für eine gerechte Gehaltsstruktur.'},
+       {q:'Was ist das Gender Pay Gap?',a:['Frauen arbeiten weniger','Mittlere Vergütungsunterschiede zwischen Männern und Frauen in vergleichbarem Kontext','Mutterschaftskosten','Unterschiedliche Kategorien'],c:1,e:'Misst den mittleren Vergütungsunterschied zwischen Männern und Frauen.'},
+       {q:'Was ist ein Jahresbonus?',a:['Obligatorisches 13. Monatsgehalt','Variable Vergütung gebunden an Jahreszielerreichung','Zusätzliche Urlaubstage','Fahrtgeld'],c:1,e:'Belohnt die individuelle und/oder Unternehmensziel-Erreichung.'},
+       {q:'Was ist Total Rewards?',a:['Nur Bruttogehalt','Summe aus Festgehalt, variabel, Leistungen, Entwicklung und Wohlbefinden','Gesamtkosten pro Mitarbeiter','Nettogehalt'],c:1,e:'Umfasst den gesamten Wert: Gehalt, Leistungen, Entwicklung und Wohlbefinden.'}],
+      /* Modul 3 */
+      [{q:'Was bedeutet PRL?',a:['Plan de Recursos Laborales','Prevención de Riesgos Laborales (Arbeitsschutz)','Programa de Retribución Laboral','Plan de Relaciones Laborales'],c:1,e:'PRL = Arbeitsschutz: Maßnahmen zum Schutz der Gesundheit am Arbeitsplatz.'},
+       {q:'Wichtigstes PRL-Gesetz in Spanien?',a:['Estatuto de los Trabajadores','Ley 31/1995 de Prevención de Riesgos Laborales','Ley Orgánica 3/2018','Ley General de la Seguridad Social'],c:1,e:'Das Gesetz 31/1995 bildet den rechtlichen Rahmen für Arbeitsschutz in Spanien.'},
+       {q:'Was ist eine Risikobewertung?',a:['Jährliche Leistungsbeurteilung','Prozess zur Identifikation von Gefahren, Risikobewertung und Präventionsplanung','Finanzprüfung','Ärztlicher Bericht'],c:1,e:'Identifiziert Gefahren und bewertet Wahrscheinlichkeit und Auswirkungen zur Prävention.'},
+       {q:'Wer ist für Sicherheit am Arbeitsplatz verantwortlich?',a:['Der Arbeitnehmer','Der Arbeitgeber','Die Gewerkschaft','Die Unfallversicherung'],c:1,e:'Der Arbeitgeber trägt die Hauptverantwortung für Sicherheit und Gesundheit der Mitarbeiter.'},
+       {q:'Was ist ein PSA (Persönliche Schutzausrüstung)?',a:['Vertragsart','Schutzausrüstung gegen Restrisiken','HR-Software','Unfallprotokoll'],c:1,e:'PSA (Helm, Handschuhe…) ist das letzte Mittel gegen Restrisiken.'},
+       {q:'Was ist ein Präventionsplan?',a:['Schulungsplan','Dokument das Präventionsaktivitäten in die Unternehmensführung integriert','Betriebsordnung','Qualitätshandbuch'],c:1,e:'Integriert den Arbeitsschutz in Struktur, Organisation und Prozesse des Unternehmens.'},
+       {q:'Was ist ein Arbeitsunfall?',a:['Jede persönliche Verletzung','Körperverletzung eines Arbeitnehmers infolge abhängiger Beschäftigung','Jede Erkrankung','Freiwillige Kündigung'],c:1,e:'Verletzung bei der Arbeit oder auf dem Weg dorthin (Wegeunfall).'},
+       {q:'Was sind psychosoziale Risiken?',a:['Lärmrisiken','Risiken durch Arbeitsorganisation: Stress, Mobbing, Burnout…','Chemikalienrisiken','Physische Unfälle'],c:1,e:'Umfassen Arbeitsstress, Mobbing, Burnout und organisationale Konflikte.'},
+       {q:'Was ist Burnout?',a:['Arbeitsunfall','Syndrom aus emotionaler Erschöpfung, Depersonalisierung und verringerter Leistung','Infektionskrankheit','Wiederholter Absentismus'],c:1,e:'Umfasst emotionale Erschöpfung, Zynismus und Effektivitätsverlust.'},
+       {q:'Was ist das 70-20-10-Modell?',a:['70% online, 20% Präsenz, 10% Coaching','70% am Arbeitsplatz, 20% von anderen, 10% formale Schulung','70% Theorie, 20% Praxis, 10% Prüfung','Budgetverteilungssystem'],c:1,e:'70% des Lernens findet am Arbeitsplatz statt, 20% von anderen, 10% formal.'},
+       {q:'Was ist E-Learning?',a:['YouTube-Videos','Strukturiertes Online-Training mit Zielen, Inhalten und Bewertung','PDF per E-Mail','Einzelne Videokonferenz'],c:1,e:'Strukturiertes, interaktives Online-Training mit Fortschrittsverfolgung.'},
+       {q:'Was ist Gamification in der Schulung?',a:['Spielen während der Arbeitszeit','Spielmechaniken zur Lernmotivation anwenden','Berufsimulator','Brettspiel'],c:1,e:'Nutzt Spielmechaniken um Motivation und Engagement beim Lernen zu steigern.'},
+       {q:'Rolle von FUNDAE?',a:['Staatliche Universität','Verwaltet betriebliche Weiterbildung einschließlich subventionierter Schulungen','Gewerkschaft','Unfallversicherung'],c:1,e:'FUNDAE verwaltet die Berufsausbildung und ermöglicht Unternehmen Schulungssubventionen.'},
+       {q:'Was ist das Sicherheits- und Gesundheitskomitee?',a:['Spezialisierte Gewerkschaft','Paritätisches Gremium zur PRL-Beteiligung zwischen Unternehmen und Arbeitnehmervertretern','Externer Präventionsdienst','Unfallversicherungsgesellschaft'],c:1,e:'Paritätisch: vereint Unternehmens- und Arbeitnehmervertreter.'},
+       {q:'Wie bewertet Kirkpatrick Schulungen?',a:['Nur Zufriedenheitsumfragen','4 Ebenen: Reaktion, Lernen, Verhalten und Ergebnisse','Teilnehmerzählung','Nur Abschlussprüfungen'],c:1,e:'4 Ebenen: Reaktion, Lernen, Verhaltensänderung und Geschäftsergebnisse.'}],
+      /* Modul 4 */
+      [{q:'Was ist das Arbeitnehmerstatut?',a:['Betriebsordnung','Grundlegendes Gesetz das Arbeitsbeziehungen in Spanien regelt','Branchentarifvertrag','Verhaltenskodex'],c:1,e:'Das Estatuto regelt Rechte und Pflichten von Arbeitnehmern und Arbeitgebern in Spanien.'},
+       {q:'Was ist ein Tarifvertrag?',a:['Einzelarbeitsvertrag','Zwischen Arbeitgebern und Gewerkschaften ausgehandeltes Abkommen über Arbeitsbedingungen','Regierungserlass','Betriebsordnung'],c:1,e:'Abkommen zwischen Arbeitgebern und Arbeitnehmervertretern über Arbeitsbedingungen.'},
+       {q:'Maximale Wochenstunden in Spanien?',a:['40 Stunden','35 Stunden','48 Stunden','Was der Arbeitgeber festlegt'],c:0,e:'Die gesetzliche Höchstarbeitszeit beträgt 40 Stunden pro Woche.'},
+       {q:'Was sind Überstunden?',a:['Stunden der regulären Arbeitszeit','Über die ordentliche Arbeitszeit hinaus geleistete Stunden, max. 80/Jahr','Schulungsstunden außerhalb der Arbeitszeit','Bereitschaftszeit'],c:1,e:'Überschreiten die ordentliche Arbeitszeit und haben ein gesetzliches Maximum von 80 Stunden/Jahr.'},
+       {q:'Was ist eine rechtmäßige Kündigung?',a:['Kündigung ohne Grund','Kündigung aufgrund nachgewiesener sachlicher oder verhaltensbedingter Gründe','Kündigung mit maximaler Abfindung','Einvernehmliche Kündigung'],c:1,e:'Basiert auf nachgewiesenen Gründen; die Abfindung ist geringer.'},
+       {q:'Was ist eine unwirksame Kündigung?',a:['Kündigung mit begründetem Anlass','Kündigung ohne ausreichenden Grund: Wiedereinstellung oder 33 Tage/Jahr Abfindung','Einvernehmliche Kündigung','Kündigung aus wirtschaftlichen Gründen'],c:1,e:'Ohne ausreichenden Grund; Recht auf Wiedereinstellung oder 33 Tage/Jahr Abfindung.'},
+       {q:'Was ist ein ERE (kollektive Entlassung)?',a:['Individuelles Entlassungsverfahren','Kollektivverfahren zur Aufhebung, Reduzierung oder Beendigung von Arbeitsverträgen','Arbeitsrechtliche Sanktion','Individuelles Disziplinarverfahren'],c:1,e:'Kollektivverfahren zur Aussetzung, Reduzierung oder Beendigung von Verträgen.'},
+       {q:'Was ist die Sozialversicherung?',a:['Privates Versicherungsunternehmen','Öffentliches System das Krankheit, Arbeitslosigkeit, Rente und andere Risiken abdeckt','Einkommensteuer','Private Krankenversicherung'],c:1,e:'Öffentliches Schutzsystem gegen berufliche und persönliche Risiken.'},
+       {q:'Was ist ein Finiquito?',a:['Gehalt des letzten Monats','Dokument das alle ausstehenden wirtschaftlichen Rechte bei Vertragsende abrechnet','Vertrag mit neuer Firma','Kündig
